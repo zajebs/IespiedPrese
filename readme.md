@@ -26,7 +26,11 @@ Lai palaistu šo projektu lokāli, seko šiem soļiem:
    STRIPE_KEY=[Stripe testa/live atslēga]  
    SECRET_KEY=[jebkāda atslēga/parole]
 
-6. Palaidiet lietotni:  
+6. Izmanto skriptus, lai iegūtu sākotnējos datus:  
+   python cron_scripts\full_update.py  
+   python cron_scripts\download_images.py
+
+6. Palaid lietotni:  
    python iespiedprese.py
 
 ## 📜 Licence
