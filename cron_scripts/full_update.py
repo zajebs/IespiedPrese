@@ -3,6 +3,7 @@ from bs4 import BeautifulSoup
 import time
 import re
 import psycopg2
+from psycopg2 import pool
 import datetime
 import os
 import sys
