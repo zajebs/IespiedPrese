@@ -86,7 +86,8 @@ def products():
     products = []
     for row in product_rows:
         filtered_product = {key: value for key, value in dict(zip(column_names, row)).items() if key not in excluded_fields}
-        filtered_product['image_url'] = convert_external_url_to_internal(filtered_product['image_url'])
+        image_url = filtered_product.get('image_url', '')  # Use get to avoid KeyError
+        filtered_product['image_url'] = convert_external_url_to_internal(image_url)
         products.append(filtered_product)
 
     if current_user.is_authenticated:
