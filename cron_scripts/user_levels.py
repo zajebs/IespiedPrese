@@ -1,4 +1,5 @@
 import psycopg2
+from psycopg2 import pool
 import datetime
 import logging
 import os
@@ -27,15 +28,21 @@ database = result.path[1:]
 hostname = result.hostname
 port = result.port
 
+connection_pool = psycopg2.pool.SimpleConnectionPool(
+    1,
+    10,
+    user=username,
+    password=password,
+    host=hostname,
+    port=port,
+    database=database
+)
+
 def get_db_connection():
-    conn = psycopg2.connect(
-        dbname=database,
-        user=username,
-        password=password,
-        host=hostname,
-        port=port
-    )
-    return conn
+    return connection_pool.getconn()
+
+def release_db_connection(conn):
+    connection_pool.putconn(conn)
 
 def get_yesterday_date():
     yesterday = datetime.datetime.now() - datetime.timedelta(days=1)
@@ -67,7 +74,8 @@ def update_expired_subscriptions():
     except Exception as e:
         logging.error(f"Failed to update subscriptions: {str(e)}")
     finally:
-        conn.close()
+        release_db_connection(conn)
 
 if __name__ == '__main__':
     update_expired_subscriptions()
+    connection_pool.closeall()

@@ -1,4 +1,5 @@
 import psycopg2
+from psycopg2 import pool
 import requests
 from urllib.parse import urlparse
 import os
@@ -30,22 +31,28 @@ log_filename = datetime.datetime.now().strftime(f'{log_dir}/%d_%m_%Y_image_downl
 logging.basicConfig(level=logging.INFO, filename=log_filename, filemode='a',
                     format='%(asctime)s - %(levelname)s - %(message)s')
 
+connection_pool = psycopg2.pool.SimpleConnectionPool(
+    1,
+    10,
+    user=username,
+    password=password,
+    host=hostname,
+    port=port,
+    database=database
+)
+
 def get_db_connection():
-    conn = psycopg2.connect(
-        dbname=database,
-        user=username,
-        password=password,
-        host=hostname,
-        port=port
-    )
-    return conn
+    return connection_pool.getconn()
+
+def release_db_connection(conn):
+    connection_pool.putconn(conn)
 
 def download_images():
     conn = get_db_connection()
     cur = conn.cursor()
     cur.execute('SELECT image_url FROM products')
     images = cur.fetchall()
-    conn.close()
+    release_db_connection(conn)
 
     if not os.path.exists(IMAGE_DIR):
         os.makedirs(IMAGE_DIR)
@@ -73,3 +80,4 @@ def download_images():
 
 if __name__ == '__main__':
     download_images()
+    connection_pool.closeall()

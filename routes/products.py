@@ -20,6 +20,7 @@ def products():
         order_string = f'{sort_by_date} DESC, downloads DESC'
 
     conn = get_db_connection()
+    cur = conn.cursor()
     
     if query:
         words = query.split()
@@ -38,45 +39,52 @@ def products():
             LIMIT %s OFFSET %s
             '''
 
-            product_rows = conn.execute(search_query, tuple(params)).fetchall()
+            cur.execute(search_query, tuple(params))
+            product_rows = cur.fetchall()
 
             count_query = f'''
             SELECT COUNT(*) FROM products
             WHERE {like_clauses}
             '''
-            total = conn.execute(count_query, tuple(params[:-2])).fetchone()[0]
+            cur.execute(count_query, tuple(params[:-2]))
+            total = cur.fetchone()[0]
         else:
             search_query = f'''
             SELECT * FROM products
             ORDER BY {order_string}
             LIMIT %s OFFSET %s
             '''
-            product_rows = conn.execute(search_query, (limit, offset)).fetchall()
+            cur.execute(search_query, (limit, offset))
+            product_rows = cur.fetchall()
 
             count_query = '''
             SELECT COUNT(*) FROM products
             '''
-            total = conn.execute(count_query).fetchone()[0]
+            cur.execute(count_query)
+            total = cur.fetchone()[0]
     else:
         search_query = f'''
         SELECT * FROM products
         ORDER BY {order_string}
         LIMIT %s OFFSET %s
         '''
-        product_rows = conn.execute(search_query, (limit, offset)).fetchall()
+        cur.execute(search_query, (limit, offset))
+        product_rows = cur.fetchall()
 
         count_query = '''
         SELECT COUNT(*) FROM products
         '''
-        total = conn.execute(count_query).fetchone()[0]
+        cur.execute(count_query)
+        total = cur.fetchone()[0]
 
+    cur.close()
     conn.close()
 
     excluded_fields = {'id_external', 'url', 'sku_external', 'download_link'}
     
     products = []
     for row in product_rows:
-        filtered_product = {key: value for key, value in dict(row).items() if key not in excluded_fields}
+        filtered_product = {key: value for key, value in dict(zip([desc[0] for desc in cur.description], row)).items() if key not in excluded_fields}
         filtered_product['image_url'] = convert_external_url_to_internal(filtered_product['image_url'])
         products.append(filtered_product)
 

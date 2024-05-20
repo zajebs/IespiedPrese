@@ -102,7 +102,7 @@ def change_password():
         user = user.fetchone()
         conn.close()
 
-        if not bcrypt.check_password_hash(user[3], current_password):  # Assumes password hash is at index 3
+        if not bcrypt.check_password_hash(user[3], current_password):
             flash('Nepareiza pašreizējā parole!', 'error')
             return redirect(url_for('account.change_password'))
 
@@ -139,7 +139,7 @@ def change_email():
         user = user.fetchone()
         conn.close()
 
-        if not bcrypt.check_password_hash(user[3], current_password):  # Assumes password hash is at index 3
+        if not bcrypt.check_password_hash(user[3], current_password):
             flash('Nepareiza pašreizējā parole!', 'error')
             return redirect(url_for('account.change_email'))
 

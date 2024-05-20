@@ -3,6 +3,7 @@ from bs4 import BeautifulSoup
 import time
 import re
 import psycopg2
+from psycopg2 import pool
 import logging
 import datetime
 import os
@@ -47,15 +48,27 @@ logging.getLogger().addHandler(console_handler)
 
 start = time.time()
 
+connection_pool = psycopg2.pool.SimpleConnectionPool(
+    1, 
+    10,
+    user=username,
+    password=password,
+    host=hostname,
+    port=port,
+    database=database
+)
+
 def get_db_connection():
-    conn = psycopg2.connect(
-        dbname=database,
-        user=username,
-        password=password,
-        host=hostname,
-        port=port
-    )
-    return conn
+    return connection_pool.getconn()
+
+def release_db_connection(conn):
+    connection_pool.putconn(conn)
+
+def parse_date(date_str):
+    return datetime.datetime.strptime(date_str, "%d.%m.%Y")
+
+def sixty_days_ago():
+    return datetime.datetime.now() - datetime.timedelta(days=60)
 
 conn = get_db_connection()
 c = conn.cursor()
@@ -75,12 +88,7 @@ c.execute('''
     )
 ''')
 conn.commit()
-
-def parse_date(date_str):
-    return datetime.datetime.strptime(date_str, "%d.%m.%Y")
-
-def sixty_days_ago():
-    return datetime.datetime.now() - datetime.timedelta(days=60)
+release_db_connection(conn)
 
 for sitemap_url in SITEMAP_URLS:
     logging.info(f"Checking {sitemap_url}")
@@ -90,13 +98,15 @@ for sitemap_url in SITEMAP_URLS:
     urls = [loc.text for loc in sitemap_soup.find_all('loc')]
 
     for url in urls:
-
-        c.execute('SELECT id FROM products WHERE url = %s', (url,))
-        if c.fetchone():
-            logging.info(f"Product already in database: {url}")
-            continue 
-
         try:
+            conn = get_db_connection()
+            c = conn.cursor()
+            c.execute('SELECT id FROM products WHERE url = %s', (url,))
+            if c.fetchone():
+                logging.info(f"Product already in database: {url}")
+                release_db_connection(conn)
+                continue 
+
             headers = {
                 'Cookie': COOKIE,
                 'Host': f'{HOST}',
@@ -123,6 +133,7 @@ for sitemap_url in SITEMAP_URLS:
             try:
                 download_link = soup.find('a', class_='red-link')['href']
             except:
+                release_db_connection(conn)
                 continue
 
             image_url = soup.find('img', class_='wp-post-image')['src']
@@ -168,13 +179,15 @@ for sitemap_url in SITEMAP_URLS:
             conn.commit()
 
             logging.info(f"Added to database: {product_name}")
+            release_db_connection(conn)
         
         except Exception as e:
             logging.error(f"Failed to process URL {url}: {e}")
+            release_db_connection(conn)
             continue
 
 end = time.time()
 total = end - start
 logging.info(f'It took {total} seconds to complete the operation.')
 
-conn.close()
+connection_pool.closeall()

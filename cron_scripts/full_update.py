@@ -3,6 +3,7 @@ from bs4 import BeautifulSoup
 import time
 import re
 import psycopg2
+from psycopg2 import pool
 import logging
 import datetime
 import os
@@ -48,15 +49,27 @@ logging.getLogger().addHandler(console_handler)
 
 start = time.time()
 
+connection_pool = psycopg2.pool.SimpleConnectionPool(
+    1,
+    10,
+    user=username,
+    password=password,
+    host=hostname,
+    port=port,
+    database=database
+)
+
 def get_db_connection():
-    conn = psycopg2.connect(
-        dbname=database,
-        user=username,
-        password=password,
-        host=hostname,
-        port=port
-    )
-    return conn
+    return connection_pool.getconn()
+
+def release_db_connection(conn):
+    connection_pool.putconn(conn)
+
+def parse_date(date_str):
+    return datetime.datetime.strptime(date_str, "%d.%m.%Y")
+
+def sixty_days_ago():
+    return datetime.datetime.now() - datetime.timedelta(days=60)
 
 conn = get_db_connection()
 c = conn.cursor()
@@ -76,12 +89,7 @@ c.execute('''
     )
 ''')
 conn.commit()
-
-def parse_date(date_str):
-    return datetime.datetime.strptime(date_str, "%d.%m.%Y")
-
-def sixty_days_ago():
-    return datetime.datetime.now() - datetime.timedelta(days=60)
+release_db_connection(conn)
 
 for sitemap_url in SITEMAP_URLS:
     logging.info(f"Checking {sitemap_url}")
@@ -158,6 +166,9 @@ for sitemap_url in SITEMAP_URLS:
             id_input = soup.find('input', {'name': 'gtm4wp_id'})
             id_external = id_input['value'] if id_input else "ID not found"
 
+            conn = get_db_connection()
+            c = conn.cursor()
+
             c.execute('SELECT version FROM products WHERE url = %s', (url,))
             existing_version = c.fetchone()
 
@@ -178,6 +189,7 @@ for sitemap_url in SITEMAP_URLS:
                 logging.info(f"No changes for {product_name}, skipping update.")
 
             conn.commit()
+            release_db_connection(conn)
 
         except Exception as e:
             logging.error(f"Failed to process URL {url}: {e}")
@@ -187,4 +199,4 @@ end = time.time()
 total = end - start
 logging.info(f'It took {total} seconds to complete the operation.')
 
-conn.close()
+connection_pool.closeall()
