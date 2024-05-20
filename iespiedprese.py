@@ -1,6 +1,4 @@
 import os
-import logging
-import sys
 from flask import Flask
 from flask_bcrypt import Bcrypt
 from flask_htmlmin import HTMLMIN
@@ -9,34 +7,6 @@ from lib.login_manager import init_login_manager
 from lib.blueprints import register_blueprints
 from lib.helpers import str_to_bool
 from dotenv import load_dotenv
-
-class LoggerWriter:
-    def __init__(self, level):
-        self.level = level
-    
-    def write(self, message):
-        if message and not message.isspace():
-            self.level(message.strip())
-    
-    def flush(self):
-        pass
-
-logger = logging.getLogger()
-logger.setLevel(logging.DEBUG)
-
-stdout_handler = logging.StreamHandler(sys.stdout)
-stdout_handler.setLevel(logging.DEBUG)
-stdout_handler.setFormatter(logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s'))
-
-file_handler = logging.FileHandler('app.log')
-file_handler.setLevel(logging.DEBUG)
-file_handler.setFormatter(logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s'))
-
-logger.addHandler(stdout_handler)
-logger.addHandler(file_handler)
-
-sys.stdout = LoggerWriter(logger.info)
-sys.stderr = LoggerWriter(logger.error)
 
 load_dotenv()
 PORT = os.getenv('PORT')
