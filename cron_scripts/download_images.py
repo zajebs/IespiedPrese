@@ -1,10 +1,7 @@
 import psycopg2
-from psycopg2 import pool
 import requests
 from urllib.parse import urlparse
 import os
-import logging
-import datetime
 from dotenv import load_dotenv
 import boto3
 from botocore.exceptions import NoCredentialsError, ClientError
@@ -27,14 +24,6 @@ AWS_ACCESS_KEY_ID = os.getenv('BUCKETEER_AWS_ACCESS_KEY_ID')
 AWS_SECRET_ACCESS_KEY = os.getenv('BUCKETEER_AWS_SECRET_ACCESS_KEY')
 AWS_REGION = os.getenv('BUCKETEER_AWS_REGION')
 AWS_BUCKET_NAME = os.getenv('BUCKETEER_BUCKET_NAME')
-
-log_dir = os.path.join(root_dir, 'logs')
-if not os.path.exists(log_dir):
-    os.makedirs(log_dir)
-
-log_filename = datetime.datetime.now().strftime(f'{log_dir}/%d_%m_%Y_image_downloads.log')
-logging.basicConfig(level=logging.INFO, filename=log_filename, filemode='a',
-                    format='%(asctime)s - %(levelname)s - %(message)s')
 
 connection_pool = psycopg2.pool.SimpleConnectionPool(
     1,
@@ -79,7 +68,7 @@ def download_images():
             try:
                 try:
                     s3.head_object(Bucket=AWS_BUCKET_NAME, Key=s3_key)
-                    logging.info(f'File {filename} already exists in S3')
+                    print(f'File {filename} already exists in S3')
                     s3_url = generate_s3_url(AWS_BUCKET_NAME, AWS_REGION, filename)
                     s3_urls.append(s3_url)
                     continue
@@ -94,13 +83,13 @@ def download_images():
                     s3.upload_fileobj(response.raw, AWS_BUCKET_NAME, s3_key)
                     s3_url = generate_s3_url(AWS_BUCKET_NAME, AWS_REGION, filename)
                     s3_urls.append(s3_url)
-                    logging.info(f'Uploaded {filename} to S3')
+                    print(f'Uploaded {filename} to S3')
                 else:
-                    logging.error(f'Failed to download {filename}. HTTP status code: {response.status_code}')
+                    print(f'Failed to download {filename}. HTTP status code: {response.status_code}')
             except NoCredentialsError:
-                logging.error('AWS credentials not available')
+                print('AWS credentials not available')
             except Exception as e:
-                logging.error(f'Failed to download or upload {filename}. Error: {str(e)}')
+                print(f'Failed to download or upload {filename}. Error: {str(e)}')
 
 if __name__ == '__main__':
     download_images()

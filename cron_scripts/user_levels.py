@@ -1,7 +1,5 @@
 import psycopg2
-from psycopg2 import pool
 import datetime
-import logging
 import os
 from urllib.parse import urlparse
 from dotenv import load_dotenv
@@ -10,14 +8,6 @@ load_dotenv()
 
 script_dir = os.path.abspath(os.path.dirname(__file__))
 root_dir = os.path.abspath(os.path.join(script_dir, '..'))
-
-log_dir = os.path.join(root_dir, 'logs')
-if not os.path.exists(log_dir):
-    os.makedirs(log_dir)
-
-log_filename = datetime.datetime.now().strftime(f'{log_dir}/%d_%m_%Y_subscription_updates.log')
-logging.basicConfig(level=logging.INFO, filename=log_filename, filemode='a',
-                    format='%(asctime)s - %(levelname)s - %(message)s')
 
 DATABASE_URL = os.getenv('DATABASE_URL')
 
@@ -61,7 +51,7 @@ def update_expired_subscriptions():
             if sub_date_str:
                 sub_date = datetime.datetime.strptime(sub_date_str, '%d-%m-%Y')
                 days_diff = (sub_date - datetime.datetime.strptime(yesterday_date, '%d-%m-%Y')).days
-                logging.info(f"User {user[1]} subscription days difference: {days_diff}")
+                print(f"User {user[1]} subscription days difference: {days_diff}")
         
         c.execute('''
             UPDATE users
@@ -70,9 +60,9 @@ def update_expired_subscriptions():
         ''', (yesterday_date,))
         
         conn.commit()
-        logging.info(f"Updated {c.rowcount} users whose subscription expired on {yesterday_date}.")
+        print(f"Updated {c.rowcount} users whose subscription expired on {yesterday_date}.")
     except Exception as e:
-        logging.error(f"Failed to update subscriptions: {str(e)}")
+        print(f"Failed to update subscriptions: {str(e)}")
     finally:
         release_db_connection(conn)
 

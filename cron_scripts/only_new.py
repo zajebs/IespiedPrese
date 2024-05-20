@@ -3,8 +3,6 @@ from bs4 import BeautifulSoup
 import time
 import re
 import psycopg2
-from psycopg2 import pool
-import logging
 import datetime
 import os
 import sys
@@ -30,21 +28,6 @@ password = result.password
 database = result.path[1:]
 hostname = result.hostname
 port = result.port
-
-log_dir = os.path.join(root_dir, 'logs')
-
-if not os.path.exists(log_dir):
-    os.makedirs(log_dir)
-
-log_filename = datetime.datetime.now().strftime(f'{log_dir}/%d_%m_%Y_product_updates.log')
-logging.basicConfig(level=logging.INFO, filename=log_filename, filemode='a',
-                    format='%(asctime)s - %(levelname)s - %(message)s')
-
-console_handler = logging.StreamHandler()
-console_handler.setLevel(logging.INFO)
-formatter = logging.Formatter('%(asctime)s - %(levelname)s - %(message)s')
-console_handler.setFormatter(formatter)
-logging.getLogger().addHandler(console_handler)
 
 start = time.time()
 
@@ -91,7 +74,7 @@ conn.commit()
 release_db_connection(conn)
 
 for sitemap_url in SITEMAP_URLS:
-    logging.info(f"Checking {sitemap_url}")
+    print(f"Checking {sitemap_url}")
     response = requests.get(sitemap_url)
     sitemap_soup = BeautifulSoup(response.content, 'xml')
 
@@ -103,7 +86,7 @@ for sitemap_url in SITEMAP_URLS:
             c = conn.cursor()
             c.execute('SELECT id FROM products WHERE url = %s', (url,))
             if c.fetchone():
-                logging.info(f"Product already in database: {url}")
+                print(f"Product already in database: {url}")
                 release_db_connection(conn)
                 continue 
 
@@ -178,16 +161,16 @@ for sitemap_url in SITEMAP_URLS:
             ''', (product_name, url, category, download_link, image_url, product_version, last_updated, sku, id_external))
             conn.commit()
 
-            logging.info(f"Added to database: {product_name}")
+            print(f"Added to database: {product_name}")
             release_db_connection(conn)
         
         except Exception as e:
-            logging.error(f"Failed to process URL {url}: {e}")
+            print(f"Failed to process URL {url}: {e}")
             release_db_connection(conn)
             continue
 
 end = time.time()
 total = end - start
-logging.info(f'It took {total} seconds to complete the operation.')
+print(f'It took {total} seconds to complete the operation.')
 
 connection_pool.closeall()

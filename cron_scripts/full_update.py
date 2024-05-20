@@ -3,8 +3,6 @@ from bs4 import BeautifulSoup
 import time
 import re
 import psycopg2
-from psycopg2 import pool
-import logging
 import datetime
 import os
 import sys
@@ -32,20 +30,6 @@ hostname = result.hostname
 port = result.port
 
 IMAGE_DIR = os.path.join(root_dir, 'static', 'images')
-log_dir = os.path.join(root_dir, 'logs')
-
-if not os.path.exists(log_dir):
-    os.makedirs(log_dir)
-
-log_filename = datetime.datetime.now().strftime(f'{log_dir}/%d_%m_%Y_product_updates.log')
-logging.basicConfig(level=logging.INFO, filename=log_filename, filemode='a',
-                    format='%(asctime)s - %(levelname)s - %(message)s')
-
-console_handler = logging.StreamHandler()
-console_handler.setLevel(logging.INFO)
-formatter = logging.Formatter('%(asctime)s - %(levelname)s - %(message)s')
-console_handler.setFormatter(formatter)
-logging.getLogger().addHandler(console_handler)
 
 start = time.time()
 
@@ -92,7 +76,7 @@ conn.commit()
 release_db_connection(conn)
 
 for sitemap_url in SITEMAP_URLS:
-    logging.info(f"Checking {sitemap_url}")
+    print(f"Checking {sitemap_url}")
     response = requests.get(sitemap_url)
     sitemap_soup = BeautifulSoup(response.content, 'xml')
 
@@ -177,26 +161,26 @@ for sitemap_url in SITEMAP_URLS:
                     INSERT INTO products (name, url, category, download_link, image_url, version, last_updated, sku_external, id_external)
                     VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)
                 ''', (product_name, url, category, download_link, image_url, product_version, last_updated, sku, id_external))
-                logging.info(f"Added to database: {product_name}")
+                print(f"Added to database: {product_name}")
             elif existing_version[0] != product_version:
                 c.execute('''
                     UPDATE products
                     SET name = %s, category = %s, download_link = %s, image_url = %s, version = %s, last_updated = %s, sku_external = %s, id_external = %s
                     WHERE url = %s
                 ''', (product_name, category, download_link, image_url, product_version, last_updated, sku, id_external, url))
-                logging.info(f"Updated in database: {product_name}. Previous version {existing_version[0]}. New version {product_version}.")
+                print(f"Updated in database: {product_name}. Previous version {existing_version[0]}. New version {product_version}.")
             else:
-                logging.info(f"No changes for {product_name}, skipping update.")
+                print(f"No changes for {product_name}, skipping update.")
 
             conn.commit()
             release_db_connection(conn)
 
         except Exception as e:
-            logging.error(f"Failed to process URL {url}: {e}")
+            print(f"Failed to process URL {url}: {e}")
             continue
 
 end = time.time()
 total = end - start
-logging.info(f'It took {total} seconds to complete the operation.')
+print(f'It took {total} seconds to complete the operation.')
 
 connection_pool.closeall()
