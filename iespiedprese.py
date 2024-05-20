@@ -28,7 +28,12 @@ stdout_handler = logging.StreamHandler(sys.stdout)
 stdout_handler.setLevel(logging.DEBUG)
 stdout_handler.setFormatter(logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s'))
 
+file_handler = logging.FileHandler('app.log')
+file_handler.setLevel(logging.DEBUG)
+file_handler.setFormatter(logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s'))
+
 logger.addHandler(stdout_handler)
+logger.addHandler(file_handler)
 
 sys.stdout = LoggerWriter(logger.info)
 sys.stderr = LoggerWriter(logger.error)
