@@ -91,7 +91,7 @@ function loadProducts(reset = false) {
 					let downloads = product.downloads;
 					let downloads_text = '';
 					if (downloads === 0) {
-						downloads_text = 'Vēl nav lejuplādēts. Esi pirmais!';
+						downloads_text = 'Vēl nav lejuplādēts';
 					} else if (downloads % 10 === 1 && downloads % 100 !== 11) {
 						downloads_text = `Lejuplādēts ${downloads} reizi`;
 					} else {

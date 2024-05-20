@@ -82,8 +82,7 @@ def setup_database():
             promo_code TEXT DEFAULT NULL,
             utc_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
             FOREIGN KEY (user_id) REFERENCES users (id),
-            FOREIGN KEY (product_id) REFERENCES products (id),
-            FOREIGN KEY (promo_code) REFERENCES promo (code)
+            FOREIGN KEY (product_id) REFERENCES products (id)
         )
     ''')
     c.execute('''
@@ -96,6 +95,14 @@ def setup_database():
             FOREIGN KEY (user_id) REFERENCES users (id)
         )
     ''')
+
+    for i in range(1, 51):
+        code = f'kods{i}'
+        c.execute('''
+            INSERT INTO promo (code)
+            VALUES (%s)
+            ON CONFLICT (code) DO NOTHING
+        ''', (code,))
 
     conn.commit()
     conn.close()

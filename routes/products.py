@@ -1,6 +1,6 @@
 from flask import Blueprint, request, jsonify
 from flask_login import current_user
-from lib.helpers import convert_external_url_to_internal
+from lib.helpers import convert_external_url_to_amazon
 from lib.database import get_db_connection
 
 products_bp = Blueprint('products', __name__)
@@ -13,7 +13,7 @@ def products():
     limit = 16 if page == 1 else 4
     offset = (4 if page == 1 else 16) + (page - 2) * 4 if page > 1 else 0
 
-    sort_by_date = "substr(last_updated, 7, 4) || '-' || substr(last_updated, 4, 2) || '-' || substr(last_updated, 1, 2)"
+    sort_by_date = "TO_DATE(last_updated, 'DD.MM.YYYY')"
     if order == 'dl':
         order_string = f'downloads DESC, {sort_by_date} DESC'
     else:
@@ -21,11 +21,11 @@ def products():
 
     conn = get_db_connection()
     cur = conn.cursor()
-    
+
     if query:
         words = query.split()
         if words:
-            like_clauses = " AND ".join(["(name LIKE %s OR category LIKE %s)"] * len(words))
+            like_clauses = " AND ".join(["(name ILIKE %s OR category ILIKE %s)"] * len(words))
             params = []
             for word in words:
                 params.append('%' + word + '%')
@@ -77,18 +77,25 @@ def products():
         cur.execute(count_query)
         total = cur.fetchone()[0]
 
-    column_names = [desc[0] for desc in cur.description]
-    cur.close()
-    conn.close()
+    column_mappings = {
+        0: 'id',
+        1: 'name',
+        3: 'category',
+        5: 'image_url',
+        6: 'version',
+        7: 'last_updated',
+        10: 'downloads'
+    }
 
-    excluded_fields = {'id_external', 'url', 'sku_external', 'download_link'}
-    
     products = []
     for row in product_rows:
-        filtered_product = {key: value for key, value in dict(zip(column_names, row)).items() if key not in excluded_fields}
-        image_url = filtered_product.get('image_url', '')  # Use get to avoid KeyError
-        filtered_product['image_url'] = convert_external_url_to_internal(image_url)
+        filtered_product = {column_mappings[idx]: value for idx, value in enumerate(row) if idx in column_mappings}
+        if 'image_url' in filtered_product:
+            filtered_product['image_url'] = convert_external_url_to_amazon(filtered_product['image_url'])
         products.append(filtered_product)
+
+    cur.close()
+    conn.close()
 
     if current_user.is_authenticated:
         user_info = {

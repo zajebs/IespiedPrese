@@ -17,7 +17,10 @@ def download(product_id):
         return jsonify({"error": "Lietotājam nav atlikušas lejuplādes šodien!"}), 403
 
     conn = get_db_connection()
-    product = conn.execute('SELECT * FROM products WHERE id = %s', (product_id,)).fetchone()
+    cur = conn.cursor()
+    cur.execute('SELECT * FROM products WHERE id = %s', (product_id,))
+    product = cur.fetchone()
+    cur.close()
     conn.close()
 
     if not product:
@@ -32,7 +35,7 @@ def download(product_id):
             decrement_user_downloads()
 
         update_product_download_count(product_id)
-        insert_download(current_user.id, product_id, product['version'], f"PLAN{current_user.sub_level}")
+        insert_download(current_user.id, product_id, product[6], f"PLAN{current_user.sub_level}")
 
         response = send_file(
             temp_file_path,
@@ -49,21 +52,22 @@ def download(product_id):
             os.unlink(temp_file_path)
         raise e
 
-
 @downloads_bp.route('/promo_download/<int:product_id>/<string:promo_code>')
 @login_required
 def promo_download(product_id, promo_code):
     conn = get_db_connection()
+    cur = conn.cursor()
     
-    recent_promo = conn.execute('''
+    cur.execute('''
         SELECT used_date FROM promo 
         WHERE used_by = %s 
         ORDER BY used_date DESC 
         LIMIT 1
-    ''', (current_user.id,)).fetchone()
+    ''', (current_user.id,))
+    recent_promo = cur.fetchone()
 
-    if recent_promo and recent_promo['used_date']:
-        last_promo_use = datetime.datetime.fromisoformat(recent_promo['used_date'])
+    if recent_promo and recent_promo[0]:
+        last_promo_use = datetime.datetime.fromisoformat(recent_promo[0])
         current_time = datetime.datetime.now(datetime.timezone.utc) + datetime.timedelta(hours=3)
         time_difference = current_time - last_promo_use
 
@@ -72,35 +76,48 @@ def promo_download(product_id, promo_code):
             hours, remainder = divmod(remaining_time.total_seconds(), 3600)
             minutes, _ = divmod(remainder, 60)
             flash(f"Promo kodu var izmantot tikai reizi 3 stundās. Nākamo kodu vari izmantot pēc <b>{int(hours)} stundām un {int(minutes)} minūtēm.</b>", "error")
+            cur.close()
             conn.close()
-    
-    try:
-        promo = conn.execute('SELECT * FROM promo WHERE code = %s AND used_date IS NULL AND used_by IS NULL', 
-                                (promo_code,)).fetchone()
-    except:
-        abort(403)
-    
-    if not promo:
-        conn.close()
-        flash("Nederīgs vai jau izmantots promo kods!", "error")
+            return abort(403)
 
     try:
-        product = conn.execute('SELECT * FROM products WHERE id = %s', (product_id,)).fetchone()
+        cur.execute('SELECT * FROM promo WHERE code = %s AND used_date IS NULL AND used_by IS NULL', 
+                                (promo_code,))
+        promo = cur.fetchone()
+    except:
+        cur.close()
+        conn.close()
+        return abort(403)
+    
+    if not promo:
+        cur.close()
+        conn.close()
+        flash("Nederīgs vai jau izmantots promo kods!", "error")
+        return abort(403)
+
+    try:
+        cur.execute('SELECT * FROM products WHERE id = %s', (product_id,))
+        product = cur.fetchone()
+        cur.close()
         conn.close()
     except:
-        abort(403)
+        cur.close()
+        conn.close()
+        return abort(403)
     
     if not product:
         flash("Produkts nav atrasts!", "error")
+        return abort(404)
 
     temp_file_path, new_filename = download_file(product)
     if not temp_file_path:
         flash("Fails nav atrasts. Sazinies ar mums vai mēģini vēlāk!", "error")
+        return abort(500)
 
     try:
-        mark_promo_code_used(promo['id'])
+        mark_promo_code_used(promo[0])
         update_product_download_count(product_id)
-        insert_download(current_user.id, product_id, product['version'], promo_code)
+        insert_download(current_user.id, product_id, product[6], promo_code)
 
         response = send_file(
             temp_file_path,
@@ -117,3 +134,4 @@ def promo_download(product_id, promo_code):
         if os.path.exists(temp_file_path):
             os.unlink(temp_file_path)
         flash("Kļūda lejuplādes laikā. Lūdzu, mēģiniet vēlreiz.", "error")
+        return abort(500)

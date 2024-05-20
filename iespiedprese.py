@@ -5,11 +5,13 @@ from flask_htmlmin import HTMLMIN
 from lib.config import SECRET_KEY
 from lib.login_manager import init_login_manager
 from lib.blueprints import register_blueprints
+from lib.helpers import str_to_bool
 from dotenv import load_dotenv
 
 load_dotenv()
 PORT = os.getenv('PORT')
-DEBUG = os.getenv('DEBUG')
+DEBUG = str_to_bool(os.getenv('DEBUG', 'False'))
+print(DEBUG)
 
 def create_app():
     app = Flask(__name__)

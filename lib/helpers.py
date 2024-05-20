@@ -6,19 +6,28 @@ import shutil
 import requests
 import uuid
 import datetime
+from dotenv import load_dotenv
 from urllib.parse import urlparse
 from flask_login import current_user
 from .config import TEMP_DIR
 from .database import get_db_connection
 
-def convert_external_url_to_internal(image_url):
+load_dotenv()
+
+BUCKETEER_BUCKET_NAME = os.getenv('BUCKETEER_BUCKET_NAME')
+AWS_REGION = os.getenv('AWS_REGION')
+
+def convert_external_url_to_amazon(image_url):
     if not image_url:
         return None
     filename = os.path.basename(urlparse(image_url).path)
-    return f"/static/images/{filename}"
+    return f"https://{BUCKETEER_BUCKET_NAME}.s3.{AWS_REGION}.amazonaws.com/public/{filename}"
+
+def str_to_bool(s):
+    return s.lower() in ('true', '1', 't', 'y', 'yes')
 
 def download_file(product):
-    url = product['download_link']
+    url = product[4]
     response = requests.get(url, stream=True)
     if response.status_code != 200:
         return None
@@ -35,32 +44,39 @@ def download_file(product):
 
 def update_product_download_count(product_id):
     conn = get_db_connection()
-    conn.execute('UPDATE products SET downloads = downloads + 1 WHERE id = %s', (product_id,))
+    cur = conn.cursor()
+    cur.execute('UPDATE products SET downloads = downloads + 1 WHERE id = %s', (product_id,))
     conn.commit()
+    cur.close()
     conn.close()
 
 def mark_promo_code_used(promo_id):
     conn = get_db_connection()
-    conn.execute('PRAGMA foreign_keys = ON')
+    cur = conn.cursor()
     current_time = datetime.datetime.now(datetime.timezone.utc) + datetime.timedelta(hours=3)
-    conn.execute('UPDATE promo SET used_date = %s, used_by = %s WHERE id = %s', 
+    cur.execute('UPDATE promo SET used_date = %s, used_by = %s WHERE id = %s', 
                 (current_time, current_user.id, promo_id))
     conn.commit()
+    cur.close()
     conn.close()
 
-def insert_download(user_id, product_id, version, promo_code):
+def insert_download(user_id, product_id, version, promo_code=None):
     conn = get_db_connection()
-    c = conn.cursor()
-    c.execute('''
+    cur = conn.cursor()
+    cur.execute('''
         INSERT INTO downloads (user_id, product_id, version, promo_code)
         VALUES (%s, %s, %s, %s)
         ''', (user_id, product_id, version, promo_code))
     conn.commit()
+    cur.close()
+    conn.close()
 
 def decrement_user_downloads():
     conn = get_db_connection()
-    conn.execute('UPDATE users SET downloads_remaining = downloads_remaining - 1 WHERE id = %s', (current_user.id,))
+    cur = conn.cursor()
+    cur.execute('UPDATE users SET downloads_remaining = downloads_remaining - 1 WHERE id = %s', (current_user.id,))
     conn.commit()
+    cur.close()
     conn.close()
 
 def log_activity(user_id, ip_address, activity_type):
@@ -100,3 +116,38 @@ def delayed_delete(file_path, delay=10):
 
     thread = threading.Thread(target=attempt_delete)
     thread.start()
+
+def fetch_all_downloads_for_user(user_id):
+    conn = get_db_connection()
+    try:
+        cur = conn.cursor()
+        cur.execute('''
+            SELECT downloads.id, products.name as product_name, downloads.version as downloaded_version, products.version as current_version
+            FROM downloads
+            JOIN products ON downloads.product_id = products.id
+            WHERE downloads.user_id = %s
+            ORDER BY downloads.utc_date DESC
+        ''', (user_id,))
+        return cur.fetchall()
+    finally:
+        cur.close()
+        conn.close()
+
+def get_latest_versions(all_downloads):
+    latest_versions = {}
+    for row in all_downloads:
+        product_name = row[1]
+        downloaded_version = row[2]
+        if product_name not in latest_versions or parse_version(downloaded_version) > parse_version(latest_versions[product_name]):
+            latest_versions[product_name] = downloaded_version
+    return latest_versions
+
+def count_updatable_products(all_downloads, latest_versions):
+    updatable_count = 0
+    for row in all_downloads:
+        product_name = row[1]
+        downloaded_version = row[2]
+        current_version = row[3]
+        if (downloaded_version == latest_versions[product_name]) and (parse_version(downloaded_version) < parse_version(current_version)):
+            updatable_count += 1
+    return updatable_count

@@ -6,6 +6,8 @@ import os
 import logging
 import datetime
 from dotenv import load_dotenv
+import boto3
+from botocore.exceptions import NoCredentialsError, ClientError
 
 load_dotenv()
 
@@ -21,7 +23,10 @@ database = result.path[1:]
 hostname = result.hostname
 port = result.port
 
-IMAGE_DIR = os.path.join(root_dir, 'static', 'images')
+AWS_ACCESS_KEY_ID = os.getenv('AWS_ACCESS_KEY_ID')
+AWS_SECRET_ACCESS_KEY = os.getenv('AWS_SECRET_ACCESS_KEY')
+AWS_REGION = os.getenv('AWS_REGION')
+BUCKETEER_BUCKET_NAME = os.getenv('BUCKETEER_BUCKET_NAME')
 
 log_dir = os.path.join(root_dir, 'logs')
 if not os.path.exists(log_dir):
@@ -41,11 +46,19 @@ connection_pool = psycopg2.pool.SimpleConnectionPool(
     database=database
 )
 
+s3 = boto3.client('s3',
+                  aws_access_key_id=AWS_ACCESS_KEY_ID,
+                  aws_secret_access_key=AWS_SECRET_ACCESS_KEY,
+                  region_name=AWS_REGION)
+
 def get_db_connection():
     return connection_pool.getconn()
 
 def release_db_connection(conn):
     connection_pool.putconn(conn)
+
+def generate_s3_url(bucket_name, region, file_name):
+    return f"https://{bucket_name}.s3.{region}.amazonaws.com/public/{file_name}"
 
 def download_images():
     conn = get_db_connection()
@@ -54,29 +67,40 @@ def download_images():
     images = cur.fetchall()
     release_db_connection(conn)
 
-    if not os.path.exists(IMAGE_DIR):
-        os.makedirs(IMAGE_DIR)
+    s3_urls = []
 
     for image in images:
         image_url = image[0]
         if image_url:
+            print(image_url)
             filename = os.path.basename(urlparse(image_url).path)
-            file_path = os.path.join(IMAGE_DIR, filename)
+            s3_key = f"public/{filename}"
 
-            if not os.path.isfile(file_path):
+            try:
                 try:
-                    response = requests.get(image_url, stream=True)
-                    if response.status_code == 200:
-                        with open(file_path, 'wb') as f:
-                            for chunk in response.iter_content(1024):
-                                f.write(chunk)
-                        logging.info(f'Downloaded {filename}')
+                    s3.head_object(Bucket=BUCKETEER_BUCKET_NAME, Key=s3_key)
+                    logging.info(f'File {filename} already exists in S3')
+                    s3_url = generate_s3_url(BUCKETEER_BUCKET_NAME, AWS_REGION, filename)
+                    s3_urls.append(s3_url)
+                    continue
+                except ClientError as e:
+                    if e.response['Error']['Code'] == '404':
+                        pass
                     else:
-                        logging.error(f'Failed to download {filename}. HTTP status code: {response.status_code}')
-                except Exception as e:
-                    logging.error(f'Failed to download {filename}. Error: {str(e)}')
-            else:
-                logging.info(f'File {filename} already exists.')
+                        raise
+
+                response = requests.get(image_url, stream=True)
+                if response.status_code == 200:
+                    s3.upload_fileobj(response.raw, BUCKETEER_BUCKET_NAME, s3_key)
+                    s3_url = generate_s3_url(BUCKETEER_BUCKET_NAME, AWS_REGION, filename)
+                    s3_urls.append(s3_url)
+                    logging.info(f'Uploaded {filename} to S3')
+                else:
+                    logging.error(f'Failed to download {filename}. HTTP status code: {response.status_code}')
+            except NoCredentialsError:
+                logging.error('AWS credentials not available')
+            except Exception as e:
+                logging.error(f'Failed to download or upload {filename}. Error: {str(e)}')
 
 if __name__ == '__main__':
     download_images()
