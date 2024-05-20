@@ -38,13 +38,13 @@ def products():
             LIMIT %s OFFSET %s
             '''
 
-            product_rows = conn.execute(search_query, params).fetchall()
+            product_rows = conn.execute(search_query, tuple(params)).fetchall()
 
             count_query = f'''
             SELECT COUNT(*) FROM products
             WHERE {like_clauses}
             '''
-            total = conn.execute(count_query, params[:-2]).fetchone()[0]
+            total = conn.execute(count_query, tuple(params[:-2])).fetchone()[0]
         else:
             search_query = f'''
             SELECT * FROM products

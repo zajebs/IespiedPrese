@@ -8,11 +8,11 @@ login_manager = LoginManager()
 def load_user(user_id):
     conn = get_db_connection()
     c = conn.cursor()
-    c.execute('SELECT * FROM users WHERE id = %s', (user_id,))
+    c.execute('SELECT id, username, email, downloads_remaining, sub_date, sub_level FROM users WHERE id = %s', (user_id,))
     user = c.fetchone()
     conn.close()
     if user:
-        return User(user['id'], user['username'], user['email'], user['downloads_remaining'], user['sub_date'], user['sub_level'])
+        return User(user[0], user[1], user[2], user[3], user[4], user[5])
     return None
 
 def init_login_manager(app):
