@@ -1,0 +1,26 @@
+{% if subscription_history %}
+<div class="overflow-x-auto">
+    <table class="min-w-full bg-white border border-gray-300 table-fixed">
+        <thead>
+            <tr>
+                <th class="py-3 px-4 bg-gray-200 font-semibold text-gray-700 border-b border-gray-300 w-1/4">Datums</th>
+                <th class="py-3 px-4 bg-gray-200 font-semibold text-gray-700 border-b border-gray-300 w-1/4">Pirkums</th>
+                <th class="py-3 px-4 bg-gray-200 font-semibold text-gray-700 border-b border-gray-300 w-1/4">Stripe vārds</th>
+                <th class="py-3 px-4 bg-gray-200 font-semibold text-gray-700 border-b border-gray-300 w-1/4">Stripe e-pasts</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for subscription in subscription_history %}
+                <tr class="{% if loop.index % 2 == 0 %}bg-gray-100{% else %}bg-white{% endif %}">
+                    <td class="border px-4 py-2">{{ subscription.utc_date }}</td>
+                    <td class="border px-4 py-2">{{ subscription.plan_name }}</td>
+                    <td class="border px-4 py-2">{{ subscription.billing_name }}</td>
+                    <td class="border px-4 py-2">{{ subscription.billing_email }}</td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% else %}
+<p class="text-gray-700 text-center">Tev vēl neesi iegādājies plānu. <a href="{{ url_for('plans.show_plans') }}" class="text-blue-500 hover:underline">Iegādājies to tagad!</a></p>
+{% endif %}

@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    {% include 'head.html' %}
+    <title>Abonēšanas Plāni - IespiedPrese</title>
+</head>
+<body class="bg-gray-100 mb-16 h-80">
+    {% include 'flash.html' %}
+    {% include 'header.html' %}
+    <div class="container mx-auto px-4 py-4 main-container flex flex-col items-center justify-start pt-6 mt-4">
+        <h1 class="text-3xl font-bold text-center mb-6">Abonēšanas Plāni</h1>
+        <div class="flex flex-wrap justify-center items-stretch gap-10" style="margin-top: 2%; /* Adjusted to push content up a bit */">
+            <div class="bg-white rounded-lg shadow-lg p-6 max-w-md w-full flex flex-col transform transition-transform hover:scale-105">
+                <h2 class="text-2xl font-bold text-center mb-4">Pamata Plāns</h2>
+                <p class="text-gray-600 mb-4">Ideāli piemērots individuālajiem lietotājiem, kuriem nepieciešamas pamatfunkcijas.</p>
+                <ul class="text-gray-800 list-disc pl-5 mb-4 flex-grow">
+                    <li>5 lejuplādes dienā</li>
+                    <li>Pieejami visi plugini un tēmas</li>
+                    <li>10 EUR mēnesī</li>
+                </ul>
+                <a href="/plan/1" class="block text-center bg-blue-500 text-white font-bold py-2 px-4 rounded hover:bg-blue-700 transition-colors mt-auto">Pievienoties</a>
+            </div>
+            <div class="bg-white rounded-lg shadow-lg p-6 max-w-md w-full flex flex-col transform transition-transform hover:scale-105">
+                <h2 class="text-2xl font-bold text-center mb-4">Premium Plāns</h2>
+                <p class="text-gray-600 mb-4">Ideāli piemērots profesionāļiem un biznesam, kuriem nepieciešams pilns atbalsts un neierobežotas iespējas.</p>
+                <ul class="text-gray-800 list-disc pl-5 mb-4 flex-grow">
+                    <li>Neierobežotas lejuplādes dienā</li>
+                    <li>Pieejami visi plugini un tēmas</li>
+                    <li>Pieejams atbalsts</li>
+                    <li>25 EUR mēnesī</li>
+                </ul>
+                <a href="/plan/2" class="block text-center bg-green-600 text-white font-bold py-2 px-4 rounded hover:bg-green-700 transition-colors mt-auto">Pievienoties</a>
+            </div>
+        </div>
+        <p class="text-center mt-8">
+            <a href="{{ url_for('contacts.contacts') }}" class="text-gray-600 hover:text-gray-800">Sazinies ar mums par ilgākām abonēšanas iespējām un sadarbību!💫</a>
+        </p>        
+    </div>
+    {% include 'footer.html' %} 
+</body>
+</html>

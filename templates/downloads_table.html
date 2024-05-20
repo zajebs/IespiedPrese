@@ -1,0 +1,47 @@
+{% if downloads %}
+<div class="overflow-x-auto">
+    <table class="min-w-full bg-white border border-gray-300 table-fixed">
+        <thead>
+            <tr>
+                <th class="py-3 px-4 bg-gray-200 font-semibold text-gray-700 border-b border-gray-300 w-1/5">Produkts</th>
+                <th class="py-3 px-4 bg-gray-200 font-semibold text-gray-700 border-b border-gray-300 w-1/5">Datums</th>
+                <th class="py-3 px-4 bg-gray-200 font-semibold text-gray-700 border-b border-gray-300 w-1/5">Versija</th>
+                <th class="py-3 px-4 bg-gray-200 font-semibold text-gray-700 border-b border-gray-300 w-1/5">Jaunākā versija</th>
+                <th class="py-3 px-4 bg-gray-200 font-semibold text-gray-700 border-b border-gray-300 w-1/5">Lejuplādes veids</th>
+                <th class="py-3 px-4 bg-gray-200 font-semibold text-gray-700 border-b border-gray-300 w-1/5">Darbība</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for download in downloads %}
+                <tr class="{% if loop.index % 2 == 0 %}bg-gray-100{% else %}bg-white{% endif %}">
+                    <td class="border px-4 py-2">{{ download.product_name }}</td>
+                    <td class="border px-4 py-2">{{ download.utc_date }}</td>
+                    <td class="border px-4 py-2">{{ download.downloaded_version }}</td>
+                    <td class="border px-4 py-2">{{ download.current_version }}</td>
+                    <td class="border px-4 py-2">{{ download.promo_code }}</td>
+                    <td class="border px-4 py-2 text-center">
+                        <a href="{{ download.update_url }}" class="font-bold py-2 px-4 m-1 inline-block rounded {% if download.button_label == 'Atjaunināt' %}bg-green-500 hover:bg-green-700{% else %}bg-blue-500 hover:bg-blue-700{% endif %} text-white">
+                            {{ download.button_label }}
+                        </a>
+                    </td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% if total_pages > 1 %}
+    <div class="mt-4 flex justify-center">
+        {% if current_page > 1 %}
+            <a href="#" class="pagination-link px-1 py-1 text-blue-500 hover:underline" data-page="{{ current_page - 1 }}">«</a>
+        {% endif %}
+        {% for page_num in range(1, total_pages + 1) %}
+            <a href="#" class="pagination-link px-1 py-1 {% if page_num == current_page %}text-blue-700{% else %}text-blue-500 hover:underline{% endif %}" data-page="{{ page_num }}">{{ page_num }}</a>
+        {% endfor %}
+        {% if current_page < total_pages %}
+            <a href="#" class="pagination-link px-1 py-1 text-blue-500 hover:underline" data-page="{{ current_page + 1 }}">»</a>
+        {% endif %}
+    </div>
+    {% endif %}
+</div>
+{% else %}
+<p class="text-gray-700 text-center">Tu vēl neko neesi ielādējis. <a href="{{ url_for('index.index') }}" class="text-blue-500 hover:underline">Apskati katalogu!</a></p>
+{% endif %}

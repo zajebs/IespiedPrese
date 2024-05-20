@@ -1,0 +1,25 @@
+{% with messages = get_flashed_messages(with_categories=True) %}
+  {% if messages %}
+    <div id="flash-messages" class="absolute top-5 right-5 z-50 w-96">
+      {% for category, message in messages %}
+        <div class="flash-message bg-{{ 'red-100' if category == 'error' else 'blue-100' }} border {{ 'border-red-400' if category == 'error' else 'border-blue-400' }} text-{{ 'red-700' if category == 'error' else 'blue-700' }} px-4 py-3 rounded relative mb-2 fade-out">
+          {{ message|safe }}
+        </div>
+      {% endfor %}
+    </div>
+    <script>
+      document.addEventListener('DOMContentLoaded', function () {
+        var messages = document.querySelectorAll('.flash-message');
+        messages.forEach(function (msg) {
+          setTimeout(function () {
+            msg.style.transition = 'opacity 0.5s';
+            msg.style.opacity = '0';
+            setTimeout(function () {
+              msg.remove();
+            }, 500);
+          }, 5000); 
+        });
+      });
+    </script>
+  {% endif %}
+{% endwith %}

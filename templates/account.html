@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    {% include 'head.html' %}
+    <title>Mans konts - IespiedPrese</title>
+</head>
+<body class="bg-gray-100 mb-16 min-h-screen flex flex-col">
+    {% include 'header.html' %}
+    {% include 'flash.html' %}
+    <div class="container mx-auto px-4 py-4 flex-grow">
+        <div class="flex flex-wrap justify-center items-stretch gap-10 w-full pt-6">
+            <div class="bg-white rounded-lg shadow-lg p-6 max-w-full w-full flex flex-col">
+                <h2 class="text-2xl font-bold text-center mb-4">Lejuplāžu vēsture</h2>
+                <div id="downloads-table-container">
+                    {% include 'downloads_table.html' %}
+                </div>
+                <h2 class="text-2xl font-bold text-center mt-8 mb-4">Pirkumu vēsture</h2>
+                <div id="subscriptions-table-container">
+                    {% include 'subscriptions_table.html' %}
+                </div>
+            </div>
+        </div>
+        <div class="text-center mt-8">
+            <div class="flex justify-center space-x-4">
+                <a href="{{ url_for('account.change_password') }}" class="text-lg mb-4 mr-4">Mainīt paroli</a>|<a href="{{ url_for('account.change_email') }}" class="text-lg mb-4">Mainīt e-pastu no <b>{{ email }}</b></a>
+            </div>
+        </div>        
+    </div>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="{{ url_for('static', filename='js/history.js') }}"></script>
+    {% include 'footer.html' %}
+</body>
+</html>

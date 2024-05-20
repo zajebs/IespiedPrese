@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        {% include 'head.html' %}
+        <title>IespiedPrese.lv</title>
+    </head>
+    <body class="bg-gray-100 mb-16">
+        {% include 'header.html' %}
+        {% include 'flash.html' %}
+        {% include 'promo.html' %}
+        <div class="container mx-auto px-4 pt-10">
+            <div class="max-w-lg mx-auto">
+                <input type="text" value ="{{ update }}" id="search" placeholder="elementor, woodmart, yoast utt..." onkeyup="resetAndLoadProducts()" class="p-3 w-full border rounded focus:outline-none focus:ring-2 focus:ring-blue-500 text-lg font-medium text-gray-700 placeholder-gray-500">
+            </div>
+            <div class="text-center my-6">
+                Rezultāti: <span id="total" class="font-semibold">0</span>
+                <div id="toggle-div" class="flex h-full items-center justify-center bg-gray-100 mt-2">
+                    <label class="w-60 h-8 bg-dark:10 relative rounded-full select-none cursor-pointer flex">
+                    <input class="peer" type="checkbox" id="order" onchange="resetAndLoadProducts()" appearance-none hidden>
+                    <div w-30 h-full bg-blue-500 rounded-full transition-all shadow-blue:50 absolute left-0 group-hover:shadow-xl peer-checked="left-30"></div>
+                    <span transition relative w-30 flex items-center justify-center font-bold text-white peer-checked:text-black>Jaunākie</span>
+                    <span transition relative w-30 flex items-center justify-center font-bold text-black peer-checked:text-white>Populārākie</span>
+                    </label>
+                </div>
+            </div>
+            <div id="no-products" class="text-center text-xl mt-4 mb-8 hidden"></div>
+            <div id="product-container" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6"></div> 
+        </div>
+        <script src="{{ url_for('static', filename='js/script.js') }}"></script>
+        {% include 'footer.html' %} 
+    </body>
+</html>

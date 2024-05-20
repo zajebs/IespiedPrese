@@ -1,0 +1,96 @@
+<header>
+    <div class="bg-white shadow-md">
+        <div class="container mx-auto px-4 py-4 flex justify-between items-center">
+            <a href="{{ url_for('index.index') }}" class="text-xl font-semibold flex items-center">
+                <img src="{{ url_for('static', filename='logo.svg') }}" alt="Logo" class="mr-2 h-16">IespiedPrese.lv
+            </a>            
+            <div class="hidden md:flex space-x-8">
+                <a href="{{ url_for('plans.show_plans') }}" class="text-gray-800 text-lg font-semibold hover:text-blue-500">Cenas</a>
+                <a href="{{ url_for('contacts.contacts') }}" class="text-gray-800 text-lg font-semibold hover:text-blue-500">Kontakti</a>
+                {% if current_user.is_authenticated %}
+                    <a id="history-link" href="{{ url_for('account.account') }}" class="relative text-gray-800 text-lg font-semibold hover:text-blue-500">Konts</a>
+                {% endif %}
+            </div>
+            <div class="hidden md:flex flex-col items-start">
+                {% if current_user.is_authenticated %}
+                    <div class="flex items-center mb-2">
+                        <i class="fas fa-user-circle text-lg mr-2"></i>
+                        <span class="mr-2">{{ current_user.username }}</span>
+                        <a href="{{ url_for('auth.logout') }}" class="text-blue-500 hover:text-blue-700">
+                            <i class="fas fa-sign-out-alt"></i>
+                        </a>
+                    </div>
+                    {% if current_user.sub_level == 0 %}
+                        <a href="{{ url_for('plans.show_plans') }}" class="text-blue-500 hover:text-blue-700 flex items-center mb-2">
+                            <i class="fas fa-shopping-cart mr-1"></i>Pirkt plānu
+                        </a>
+                    {% elif current_user.sub_level >= 1 %}
+                        <div class="flex items-center mb-2">
+                            <i class="fas fa-download mr-2"></i>
+                            Lejuplādes šodien:
+                            {% if current_user.sub_level == 1 %}
+                                {{ current_user.downloads_remaining }}
+                            {% elif current_user.sub_level == 2 %}
+                                &infin;
+                            {% endif %}
+                        </div>
+                        <div class="flex items-center">
+                            <i class="fas fa-calendar-day mr-2"></i>
+                            Dienas atlikušas: {{ current_user.days_left }}
+                        </div>
+                    {% endif %}
+                {% else %}
+                    <a href="{{ url_for('auth.login') }}" class="text-blue-500 hover:text-blue-700 flex items-center mb-1">
+                        <i class="fas fa-sign-in-alt mr-2"></i>Pieslēgties
+                    </a>
+                    <a href="{{ url_for('auth.register') }}" class="text-blue-500 hover:text-blue-700 flex items-center">
+                        <i class="fas fa-user-plus mr-1"></i>Reģistrēties
+                    </a>
+                {% endif %}
+            </div>
+            <button class="md:hidden text-gray-800" onclick="toggleMenu()">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7"></path>
+                </svg>
+            </button>
+        </div>
+    </div>
+    <div id="mobile-menu" class="hidden absolute top-0 left-0 w-full bg-white shadow-lg z-50 md:hidden">
+        <div class="p-4">
+            <div class="flex justify-between items-center mb-4">
+                <a href="{{ url_for('index.index') }}" class="text-xl font-semibold flex items-center">
+                    <img src="{{ url_for('static', filename='logo.svg') }}" alt="Logo" class="mr-2 h-16">IespiedPrese.lv
+                </a>
+                <button class="text-gray-800" onclick="toggleMenu()">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                    </svg>
+                </button>
+            </div>
+            {% if current_user.is_authenticated %}
+                <div class="text-lg mb-4"><b>{{ current_user.username }}</b></div>
+                <div class="border-t border-gray-200 my-2"></div>
+                <div class="text-lg mb-4">Lejuplādes šodien: 
+                    {% if current_user.sub_level == 1 %}
+                        <b>{{ current_user.downloads_remaining }}</b>
+                    {% elif current_user.sub_level == 2 %}
+                    <b>&infin;</b>
+                    {% endif %}
+                </div>
+                <div class="text-lg mb-4">Dienas atlikušas: <b>{{ current_user.days_left }}</b></div>
+                <a id="history-link-mobile" href="{{ url_for('account.account') }}" class="text-lg mb-4 block">Mans konts</a>
+                <div class="border-t border-gray-200 my-2"></div>
+            {% endif %}
+            <a href="{{ url_for('plans.show_plans') }}" class="text-lg mb-4 block">Cenas</a>
+            <a href="{{ url_for('contacts.contacts') }}" class="text-lg mb-4 block">Kontakti</a>
+            <div class="border-t border-gray-200 my-2"></div>
+            {% if current_user.is_authenticated %}
+                <a href="{{ url_for('auth.logout') }}" class="text-lg block">Izrakstīties</a>
+            {% else %}
+                <a href="{{ url_for('auth.login') }}" class="text-lg mb-4 block">Pieslēgties</a>
+                <a href="{{ url_for('auth.register') }}" class="text-lg block">Reģistrēties</a>
+            {% endif %}
+        </div>
+    </div>
+</header>
+<script src="{{ url_for('static', filename='js/header.js') }}"></script>
