@@ -10,7 +10,6 @@ if not os.path.exists(log_dir):
 print(root_dir)
 print(log_dir)
 
-# Setup logging
 log_filename = datetime.datetime.now().strftime(f'{log_dir}/%d_%m_%Y_cron_tasks.log')
 logging.basicConfig(level=logging.INFO, filename=log_filename, filemode='a',
                     format='%(asctime)s - %(levelname)s - %(message)s')

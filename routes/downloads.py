@@ -1,4 +1,4 @@
-from flask import Blueprint, request, jsonify, send_file, flash, abort
+from flask import Blueprint, jsonify, send_file, flash, abort
 from flask_login import login_required, current_user
 from lib.helpers import (download_file, update_product_download_count, mark_promo_code_used, insert_download, 
                          decrement_user_downloads, delayed_delete)

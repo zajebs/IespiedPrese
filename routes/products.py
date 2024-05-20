@@ -1,6 +1,6 @@
 from flask import Blueprint, request, jsonify
 from flask_login import current_user
-from lib.helpers import convert_external_url_to_internal, parse_version
+from lib.helpers import convert_external_url_to_internal
 from lib.database import get_db_connection
 
 products_bp = Blueprint('products', __name__)

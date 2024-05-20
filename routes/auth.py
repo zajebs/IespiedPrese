@@ -4,7 +4,7 @@ from lib.helpers import log_activity, validate_email
 from lib.database import get_db_connection
 from lib.models import User
 from flask_bcrypt import Bcrypt
-import sqlite3
+import psycopg2
 
 auth_bp = Blueprint('auth', __name__)
 bcrypt = Bcrypt()
@@ -31,19 +31,22 @@ def register():
         hashed_password = bcrypt.generate_password_hash(password).decode('utf-8')
 
         conn = get_db_connection()
+        cur = conn.cursor()
         try:
-            conn.execute('INSERT INTO users (username, email, password_hash) VALUES (?, ?, ?)',
-                         (username, email, hashed_password))
+            cur.execute('INSERT INTO users (username, email, password_hash) VALUES (%s, %s, %s)',
+                        (username, email, hashed_password))
             conn.commit()
 
-            user_id = conn.execute('SELECT id FROM users WHERE username = ?', (username,)).fetchone()['id']
+            cur.execute('SELECT id FROM users WHERE username = %s', (username,))
+            user_id = cur.fetchone()[0]
             user_ip = request.headers.get('X-Forwarded-For', request.remote_addr)
             log_activity(user_id, user_ip, 'Register')
 
-        except sqlite3.IntegrityError:
+        except psycopg2.IntegrityError:
             flash('Lietotājvārds vai e-pasts jau ir aizņemts!', 'error')
             return render_template('register.html')
         finally:
+            cur.close()
             conn.close()
 
         flash(f'Paldies par reģistrāciju, {username}! Tagad vari pieslēgties.', 'success')
@@ -60,19 +63,22 @@ def login():
         password = request.form['password']
 
         conn = get_db_connection()
+        cur = conn.cursor()
         try:
             if '@' in login_input:
-                user = conn.execute('SELECT id, username, email, password_hash, downloads_remaining, sub_date, sub_level FROM users WHERE email = ?', (login_input,)).fetchone()
+                cur.execute('SELECT id, username, email, password_hash, downloads_remaining, sub_date, sub_level FROM users WHERE email = %s', (login_input,))
             else:
-                user = conn.execute('SELECT id, username, email, password_hash, downloads_remaining, sub_date, sub_level FROM users WHERE username = ?', (login_input,)).fetchone()
+                cur.execute('SELECT id, username, email, password_hash, downloads_remaining, sub_date, sub_level FROM users WHERE username = %s', (login_input,))
+            user = cur.fetchone()
         finally:
+            cur.close()
             conn.close()
 
-        if user and bcrypt.check_password_hash(user['password_hash'], password):
-            user_obj = User(id=user['id'], username=user['username'], email=user['email'], downloads_remaining=user['downloads_remaining'], sub_date=user['sub_date'], sub_level=user['sub_level'])
+        if user and bcrypt.check_password_hash(user[3], password):
+            user_obj = User(id=user[0], username=user[1], email=user[2], downloads_remaining=user[4], sub_date=user[5], sub_level=user[6])
             login_user(user_obj)
             user_ip = request.headers.get('X-Forwarded-For', request.remote_addr)
-            log_activity(user['id'], user_ip, 'Login')
+            log_activity(user[0], user_ip, 'Login')
             return redirect(url_for('index.index'))
         else:
             flash('Nepareizi dati!', 'error')

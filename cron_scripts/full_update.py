@@ -2,11 +2,12 @@ import requests
 from bs4 import BeautifulSoup
 import time
 import re
-import sqlite3
+import psycopg2
 import logging
 import datetime
 import os
 import sys
+from urllib.parse import urlparse
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -20,7 +21,15 @@ USER_AGENT = os.getenv('USER_AGENT')
 HOST = os.getenv('HOST')
 SITEMAP_URLS = os.getenv('SITEMAP_URLS', '').split(',')
 
-DB_PATH = os.path.join(root_dir, 'database.db')
+DATABASE_URL = os.getenv('DATABASE_URL')
+
+result = urlparse(DATABASE_URL)
+username = result.username
+password = result.password
+database = result.path[1:]
+hostname = result.hostname
+port = result.port
+
 IMAGE_DIR = os.path.join(root_dir, 'static', 'images')
 log_dir = os.path.join(root_dir, 'logs')
 
@@ -39,11 +48,21 @@ logging.getLogger().addHandler(console_handler)
 
 start = time.time()
 
-conn = sqlite3.connect(DB_PATH)
+def get_db_connection():
+    conn = psycopg2.connect(
+        dbname=database,
+        user=username,
+        password=password,
+        host=hostname,
+        port=port
+    )
+    return conn
+
+conn = get_db_connection()
 c = conn.cursor()
 c.execute('''
     CREATE TABLE IF NOT EXISTS products (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        id SERIAL PRIMARY KEY,
         name TEXT,
         url TEXT UNIQUE,
         category TEXT,
@@ -139,20 +158,20 @@ for sitemap_url in SITEMAP_URLS:
             id_input = soup.find('input', {'name': 'gtm4wp_id'})
             id_external = id_input['value'] if id_input else "ID not found"
 
-            c.execute('SELECT version FROM products WHERE url = ?', (url,))
+            c.execute('SELECT version FROM products WHERE url = %s', (url,))
             existing_version = c.fetchone()
 
             if existing_version is None:
                 c.execute('''
                     INSERT INTO products (name, url, category, download_link, image_url, version, last_updated, sku_external, id_external)
-                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+                    VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)
                 ''', (product_name, url, category, download_link, image_url, product_version, last_updated, sku, id_external))
                 logging.info(f"Added to database: {product_name}")
             elif existing_version[0] != product_version:
                 c.execute('''
                     UPDATE products
-                    SET name = ?, category = ?, download_link = ?, image_url = ?, version = ?, last_updated = ?, sku_external = ?, id_external = ?
-                    WHERE url = ?
+                    SET name = %s, category = %s, download_link = %s, image_url = %s, version = %s, last_updated = %s, sku_external = %s, id_external = %s
+                    WHERE url = %s
                 ''', (product_name, category, download_link, image_url, product_version, last_updated, sku, id_external, url))
                 logging.info(f"Updated in database: {product_name}. Previous version {existing_version[0]}. New version {product_version}.")
             else:

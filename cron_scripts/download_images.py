@@ -1,14 +1,25 @@
-import sqlite3
+import psycopg2
 import requests
 from urllib.parse import urlparse
 import os
 import logging
 import datetime
+from dotenv import load_dotenv
+
+load_dotenv()
 
 script_dir = os.path.abspath(os.path.dirname(__file__))
 root_dir = os.path.join(script_dir, '..')
 
-DB_PATH = os.path.join(root_dir, 'database.db')
+DATABASE_URL = os.getenv('DATABASE_URL')
+
+result = urlparse(DATABASE_URL)
+username = result.username
+password = result.password
+database = result.path[1:]
+hostname = result.hostname
+port = result.port
+
 IMAGE_DIR = os.path.join(root_dir, 'static', 'images')
 
 log_dir = os.path.join(root_dir, 'logs')
@@ -20,20 +31,27 @@ logging.basicConfig(level=logging.INFO, filename=log_filename, filemode='a',
                     format='%(asctime)s - %(levelname)s - %(message)s')
 
 def get_db_connection():
-    conn = sqlite3.connect(DB_PATH)
-    conn.row_factory = sqlite3.Row
+    conn = psycopg2.connect(
+        dbname=database,
+        user=username,
+        password=password,
+        host=hostname,
+        port=port
+    )
     return conn
 
 def download_images():
     conn = get_db_connection()
-    images = conn.execute('SELECT image_url FROM products').fetchall()
+    cur = conn.cursor()
+    cur.execute('SELECT image_url FROM products')
+    images = cur.fetchall()
     conn.close()
 
     if not os.path.exists(IMAGE_DIR):
         os.makedirs(IMAGE_DIR)
 
     for image in images:
-        image_url = image['image_url']
+        image_url = image[0]
         if image_url:
             filename = os.path.basename(urlparse(image_url).path)
             file_path = os.path.join(IMAGE_DIR, filename)

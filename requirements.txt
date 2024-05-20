@@ -7,3 +7,4 @@ python-dotenv==1.0.1
 Requests==2.31.0
 stripe==9.5.0
 lxml==5.2.2
+psycopg2-binary==2.9.3

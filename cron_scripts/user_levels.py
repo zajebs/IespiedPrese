@@ -1,7 +1,11 @@
-import sqlite3
+import psycopg2
 import datetime
 import logging
 import os
+from urllib.parse import urlparse
+from dotenv import load_dotenv
+
+load_dotenv()
 
 script_dir = os.path.abspath(os.path.dirname(__file__))
 root_dir = os.path.abspath(os.path.join(script_dir, '..'))
@@ -14,7 +18,24 @@ log_filename = datetime.datetime.now().strftime(f'{log_dir}/%d_%m_%Y_subscriptio
 logging.basicConfig(level=logging.INFO, filename=log_filename, filemode='a',
                     format='%(asctime)s - %(levelname)s - %(message)s')
 
-DB_PATH = os.path.join(root_dir, 'database.db')
+DATABASE_URL = os.getenv('DATABASE_URL')
+
+result = urlparse(DATABASE_URL)
+username = result.username
+password = result.password
+database = result.path[1:]
+hostname = result.hostname
+port = result.port
+
+def get_db_connection():
+    conn = psycopg2.connect(
+        dbname=database,
+        user=username,
+        password=password,
+        host=hostname,
+        port=port
+    )
+    return conn
 
 def get_yesterday_date():
     yesterday = datetime.datetime.now() - datetime.timedelta(days=1)
@@ -22,7 +43,7 @@ def get_yesterday_date():
 
 def update_expired_subscriptions():
     yesterday_date = get_yesterday_date()
-    conn = sqlite3.connect(DB_PATH)
+    conn = get_db_connection()
     c = conn.cursor()
     
     try:
@@ -38,7 +59,7 @@ def update_expired_subscriptions():
         c.execute('''
             UPDATE users
             SET sub_level = 0
-            WHERE sub_date = ?
+            WHERE sub_date = %s
         ''', (yesterday_date,))
         
         conn.commit()
