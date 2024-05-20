@@ -6,3 +6,4 @@ Flask_Login==0.6.3
 python-dotenv==1.0.1
 Requests==2.31.0
 stripe==9.5.0
+lxml==5.2.2
