@@ -15,7 +15,7 @@ def updatable():
             SELECT downloads.id, products.name as product_name, downloads.version as downloaded_version, products.version as current_version
             FROM downloads
             JOIN products ON downloads.product_id = products.id
-            WHERE downloads.user_id = ?
+            WHERE downloads.user_id = %s
             ORDER BY downloads.utc_date DESC
         ''', (current_user.id,))
         all_downloads = cur.fetchall()

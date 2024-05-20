@@ -8,7 +8,7 @@ login_manager = LoginManager()
 def load_user(user_id):
     conn = get_db_connection()
     c = conn.cursor()
-    c.execute('SELECT * FROM users WHERE id = ?', (user_id,))
+    c.execute('SELECT * FROM users WHERE id = %s', (user_id,))
     user = c.fetchone()
     conn.close()
     if user:

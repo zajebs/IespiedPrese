@@ -17,7 +17,7 @@ def download(product_id):
         return jsonify({"error": "Lietotājam nav atlikušas lejuplādes šodien!"}), 403
 
     conn = get_db_connection()
-    product = conn.execute('SELECT * FROM products WHERE id = ?', (product_id,)).fetchone()
+    product = conn.execute('SELECT * FROM products WHERE id = %s', (product_id,)).fetchone()
     conn.close()
 
     if not product:
@@ -57,7 +57,7 @@ def promo_download(product_id, promo_code):
     
     recent_promo = conn.execute('''
         SELECT used_date FROM promo 
-        WHERE used_by = ? 
+        WHERE used_by = %s 
         ORDER BY used_date DESC 
         LIMIT 1
     ''', (current_user.id,)).fetchone()
@@ -75,7 +75,7 @@ def promo_download(product_id, promo_code):
             conn.close()
     
     try:
-        promo = conn.execute('SELECT * FROM promo WHERE code = ? AND used_date IS NULL AND used_by IS NULL', 
+        promo = conn.execute('SELECT * FROM promo WHERE code = %s AND used_date IS NULL AND used_by IS NULL', 
                                 (promo_code,)).fetchone()
     except:
         abort(403)
@@ -85,7 +85,7 @@ def promo_download(product_id, promo_code):
         flash("Nederīgs vai jau izmantots promo kods!", "error")
 
     try:
-        product = conn.execute('SELECT * FROM products WHERE id = ?', (product_id,)).fetchone()
+        product = conn.execute('SELECT * FROM products WHERE id = %s', (product_id,)).fetchone()
         conn.close()
     except:
         abort(403)

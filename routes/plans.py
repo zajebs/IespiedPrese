@@ -74,13 +74,13 @@ def success():
 
         c.execute('''
             UPDATE users
-            SET downloads_remaining = 5, sub_date = ?, sub_level = ?
-            WHERE id = ?
+            SET downloads_remaining = 5, sub_date = %s, sub_level = %s
+            WHERE id = %s
         ''', (new_sub_date, session.metadata['plan_id'], current_user.id))
 
         c.execute('''
             INSERT INTO purchases (user_id, plan_id, billing_name, billing_email)
-            VALUES (?, ?, ?, ?)
+            VALUES (%s, %s, %s, %s)
         ''', (current_user.id, session.metadata['plan_id'], customer_name, customer_email))
 
         conn.commit()

@@ -35,7 +35,7 @@ def download_file(product):
 
 def update_product_download_count(product_id):
     conn = get_db_connection()
-    conn.execute('UPDATE products SET downloads = downloads + 1 WHERE id = ?', (product_id,))
+    conn.execute('UPDATE products SET downloads = downloads + 1 WHERE id = %s', (product_id,))
     conn.commit()
     conn.close()
 
@@ -43,8 +43,8 @@ def mark_promo_code_used(promo_id):
     conn = get_db_connection()
     conn.execute('PRAGMA foreign_keys = ON')
     current_time = datetime.datetime.now(datetime.timezone.utc) + datetime.timedelta(hours=3)
-    conn.execute('UPDATE promo SET used_date = ?, used_by = ? WHERE id = ?', 
-                 (current_time, current_user.id, promo_id))
+    conn.execute('UPDATE promo SET used_date = %s, used_by = %s WHERE id = %s', 
+                (current_time, current_user.id, promo_id))
     conn.commit()
     conn.close()
 
@@ -53,13 +53,13 @@ def insert_download(user_id, product_id, version, promo_code):
     c = conn.cursor()
     c.execute('''
         INSERT INTO downloads (user_id, product_id, version, promo_code)
-        VALUES (?, ?, ?, ?)
+        VALUES (%s, %s, %s, %s)
         ''', (user_id, product_id, version, promo_code))
     conn.commit()
 
 def decrement_user_downloads():
     conn = get_db_connection()
-    conn.execute('UPDATE users SET downloads_remaining = downloads_remaining - 1 WHERE id = ?', (current_user.id,))
+    conn.execute('UPDATE users SET downloads_remaining = downloads_remaining - 1 WHERE id = %s', (current_user.id,))
     conn.commit()
     conn.close()
 
@@ -69,7 +69,7 @@ def log_activity(user_id, ip_address, activity_type):
     try:
         c.execute('''
             INSERT INTO activity (user_id, ip_address, type, utc_date)
-            VALUES (?, ?, ?, ?)
+            VALUES (%s, %s, %s, %s)
         ''', (user_id, ip_address, activity_type, datetime.datetime.utcnow()))
         conn.commit()
     finally:

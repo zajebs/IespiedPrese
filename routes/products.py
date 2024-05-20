@@ -24,7 +24,7 @@ def products():
     if query:
         words = query.split()
         if words:
-            like_clauses = " AND ".join(["(name LIKE ? OR category LIKE ?)"] * len(words))
+            like_clauses = " AND ".join(["(name LIKE %s OR category LIKE %s)"] * len(words))
             params = []
             for word in words:
                 params.append('%' + word + '%')
@@ -35,7 +35,7 @@ def products():
             SELECT * FROM products
             WHERE {like_clauses}
             ORDER BY {order_string}
-            LIMIT ? OFFSET ?
+            LIMIT %s OFFSET %s
             '''
 
             product_rows = conn.execute(search_query, params).fetchall()
@@ -49,7 +49,7 @@ def products():
             search_query = f'''
             SELECT * FROM products
             ORDER BY {order_string}
-            LIMIT ? OFFSET ?
+            LIMIT %s OFFSET %s
             '''
             product_rows = conn.execute(search_query, (limit, offset)).fetchall()
 
@@ -61,7 +61,7 @@ def products():
         search_query = f'''
         SELECT * FROM products
         ORDER BY {order_string}
-        LIMIT ? OFFSET ?
+        LIMIT %s OFFSET %s
         '''
         product_rows = conn.execute(search_query, (limit, offset)).fetchall()
 
