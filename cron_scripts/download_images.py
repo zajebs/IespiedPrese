@@ -23,10 +23,10 @@ database = result.path[1:]
 hostname = result.hostname
 port = result.port
 
-AWS_ACCESS_KEY_ID = os.getenv('AWS_ACCESS_KEY_ID')
-AWS_SECRET_ACCESS_KEY = os.getenv('AWS_SECRET_ACCESS_KEY')
-AWS_REGION = os.getenv('AWS_REGION')
-BUCKETEER_BUCKET_NAME = os.getenv('BUCKETEER_BUCKET_NAME')
+AWS_ACCESS_KEY_ID = os.getenv('BUCKETEER_AWS_ACCESS_KEY_ID')
+AWS_SECRET_ACCESS_KEY = os.getenv('BUCKETEER_AWS_SECRET_ACCESS_KEY')
+AWS_REGION = os.getenv('BUCKETEER_AWS_REGION')
+AWS_BUCKET_NAME = os.getenv('BUCKETEER_BUCKET_NAME')
 
 log_dir = os.path.join(root_dir, 'logs')
 if not os.path.exists(log_dir):
@@ -78,9 +78,9 @@ def download_images():
 
             try:
                 try:
-                    s3.head_object(Bucket=BUCKETEER_BUCKET_NAME, Key=s3_key)
+                    s3.head_object(Bucket=AWS_BUCKET_NAME, Key=s3_key)
                     logging.info(f'File {filename} already exists in S3')
-                    s3_url = generate_s3_url(BUCKETEER_BUCKET_NAME, AWS_REGION, filename)
+                    s3_url = generate_s3_url(AWS_BUCKET_NAME, AWS_REGION, filename)
                     s3_urls.append(s3_url)
                     continue
                 except ClientError as e:
@@ -91,8 +91,8 @@ def download_images():
 
                 response = requests.get(image_url, stream=True)
                 if response.status_code == 200:
-                    s3.upload_fileobj(response.raw, BUCKETEER_BUCKET_NAME, s3_key)
-                    s3_url = generate_s3_url(BUCKETEER_BUCKET_NAME, AWS_REGION, filename)
+                    s3.upload_fileobj(response.raw, AWS_BUCKET_NAME, s3_key)
+                    s3_url = generate_s3_url(AWS_BUCKET_NAME, AWS_REGION, filename)
                     s3_urls.append(s3_url)
                     logging.info(f'Uploaded {filename} to S3')
                 else:

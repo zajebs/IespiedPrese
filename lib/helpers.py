@@ -14,14 +14,14 @@ from .database import get_db_connection
 
 load_dotenv()
 
-BUCKETEER_BUCKET_NAME = os.getenv('BUCKETEER_BUCKET_NAME')
-AWS_REGION = os.getenv('AWS_REGION')
+AWS_BUCKET_NAME = os.getenv('BUCKETEER_BUCKET_NAME')
+AWS_REGION = os.getenv('BUCKETEER_AWS_REGION')
 
 def convert_external_url_to_amazon(image_url):
     if not image_url:
         return None
     filename = os.path.basename(urlparse(image_url).path)
-    return f"https://{BUCKETEER_BUCKET_NAME}.s3.{AWS_REGION}.amazonaws.com/public/{filename}"
+    return f"https://{AWS_BUCKET_NAME}.s3.{AWS_REGION}.amazonaws.com/public/{filename}"
 
 def str_to_bool(s):
     return s.lower() in ('true', '1', 't', 'y', 'yes')
