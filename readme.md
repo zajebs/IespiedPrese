@@ -22,9 +22,13 @@ Lai palaistu šo projektu lokāli, seko šiem soļiem:
 
 5. Izveido .env failu projekta saknes direktorijā un pievienoj savus mainīgos:  
    COOKIE=[Lapas cepums]  
+   HOST=[Pluginu un tēmu repozitorijs]  
+   SITEMAP_URLS=[Repozitorija sitemapi, comma separated]  
    USER_AGENT=Mozilla/5.0 (X11; Linux x86_64; rv:126.0) Gecko/20100101 Firefox/126.0 (vai kāds cits user agent)  
    STRIPE_KEY=[Stripe testa/live atslēga]  
-   SECRET_KEY=[jebkāda atslēga/parole]
+   SECRET_KEY=[jebkāda atslēga/parole]  
+   PORT=[80 vai 443]  
+   DEBUG=[True vai False]
 
 6. Izmanto skriptus, lai iegūtu sākotnējos datus:  
    python cron_scripts\full_update.py  

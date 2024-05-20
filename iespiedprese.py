@@ -1,9 +1,15 @@
+import os
 from flask import Flask
 from flask_bcrypt import Bcrypt
 from flask_htmlmin import HTMLMIN
 from lib.config import SECRET_KEY
 from lib.login_manager import init_login_manager
 from lib.blueprints import register_blueprints
+from dotenv import load_dotenv
+
+load_dotenv()
+PORT = os.getenv('PORT')
+DEBUG = os.getenv('DEBUG')
 
 def create_app():
     app = Flask(__name__)
@@ -17,4 +23,4 @@ def create_app():
 
 if __name__ == '__main__':
     app = create_app()
-    app.run(host='0.0.0.0', port=5000, debug=False)
+    app.run(host='0.0.0.0', port=PORT, debug=DEBUG)
