@@ -77,6 +77,7 @@ def products():
         cur.execute(count_query)
         total = cur.fetchone()[0]
 
+    column_names = [desc[0] for desc in cur.description]
     cur.close()
     conn.close()
 
@@ -84,7 +85,7 @@ def products():
     
     products = []
     for row in product_rows:
-        filtered_product = {key: value for key, value in dict(zip([desc[0] for desc in cur.description], row)).items() if key not in excluded_fields}
+        filtered_product = {key: value for key, value in dict(zip(column_names, row)).items() if key not in excluded_fields}
         filtered_product['image_url'] = convert_external_url_to_internal(filtered_product['image_url'])
         products.append(filtered_product)
 
