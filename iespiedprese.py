@@ -7,14 +7,16 @@ from lib.login_manager import init_login_manager
 from lib.blueprints import register_blueprints
 from lib.helpers import str_to_bool
 from dotenv import load_dotenv
+from flask_squeeze import Squeeze
 
+squeeze = Squeeze()
 load_dotenv()
 PORT = os.getenv('PORT')
 DEBUG = str_to_bool(os.getenv('DEBUG', 'False'))
-print(DEBUG)
 
 def create_app():
     app = Flask(__name__)
+    squeeze.init_app(app)
     app.secret_key = SECRET_KEY
     app.config['MINIFY_HTML'] = True
     HTMLMIN(app)
