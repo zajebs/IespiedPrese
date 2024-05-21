@@ -122,7 +122,7 @@ function loadProducts(reset = false) {
 							return `
                                 <div class="text-center mt-6">
                                     <div class="flex justify-center space-x-4">
-                                        <a href="login" class="flex-1 bg-blue-700 text-white py-2 px-4 rounded hover:bg-blue-900 text-center whitespace-nowrap">Pieslēgties</a>
+                                        <a href="login" class="flex-1 bg-blue-800 text-white py-2 px-4 rounded hover:bg-blue-900 text-center whitespace-nowrap">Pieslēgties</a>
                                         <a href="register" class="flex-1 bg-green-700 text-white py-2 px-4 rounded hover:bg-green-900 text-center whitespace-nowrap">Reģistrēties</a>
                                     </div>
                                 </div>
@@ -131,7 +131,7 @@ function loadProducts(reset = false) {
 							return `
                                 <div class="text-center mt-6">
                                     <div class="flex justify-center space-x-4">
-                                        <a href="/plans" class="flex-1 bg-blue-700 text-white font-bold py-2 px-4 rounded hover:bg-blue-900 text-center whitespace-nowrap">Pirkt</a>
+                                        <a href="/plans" class="flex-1 bg-blue-800 text-white font-bold py-2 px-4 rounded hover:bg-blue-900 text-center whitespace-nowrap">Pirkt</a>
                                         <span class="flex-1 bg-green-700 text-white py-2 px-4 rounded hover:bg-green-900 cursor-pointer promo-code-link text-center whitespace-nowrap" data-id="${productId}">Ir kods?</span>
                                     </div>
                                 </div>
@@ -139,18 +139,18 @@ function loadProducts(reset = false) {
 						} else if (user.sub_level == 1) {
 							if (user.downloads_remaining > 0) {
 								return `
-                                    <button class="download-btn w-full text-center py-2 px-4 bg-blue-700 text-white rounded cursor-pointer mt-6 hover:bg-blue-900" data-id="${productId}">Lejuplādēt</button>
+                                    <button class="download-btn w-full text-center py-2 px-4 bg-blue-800 text-white rounded cursor-pointer mt-6 hover:bg-blue-900" data-id="${productId}">Lejuplādēt</button>
                                 `;
 							} else {
 								return `
-                                    <button class="w-full text-center py-2 px-4 bg-blue-700 text-white rounded cursor-pointer mt-6 hover:bg-blue-900 promo-code-link" data-id="${productId}">
+                                    <button class="w-full text-center py-2 px-4 bg-blue-800 text-white rounded cursor-pointer mt-6 hover:bg-blue-900 promo-code-link" data-id="${productId}">
                                         Ievadīt promo kodu
                                     </button>
                                 `;
 							}
 						} else if (user.sub_level == 2) {
 							return `
-                                <button class="download-btn w-full text-center py-2 px-4 bg-blue-700 text-white rounded cursor-pointer mt-6 hover:bg-blue-900" data-id="${productId}">Lejuplādēt</button>
+                                <button class="download-btn w-full text-center py-2 px-4 bg-blue-800 text-white rounded cursor-pointer mt-6 hover:bg-blue-900" data-id="${productId}">Lejuplādēt</button>
                             `;
 						}
 					}
