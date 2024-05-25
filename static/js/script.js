@@ -101,7 +101,7 @@ function loadProducts(reset = false) {
 					productDiv.className = 'h-full bg-white p-4 shadow rounded-lg flex flex-col justify-between';
 					productDiv.innerHTML = `
                     <div class="bg-gray-100 rounded-lg shadow-md overflow-hidden transform transition-transform hover:scale-105 flex flex-col h-full">
-                    <img src="${product.image_url}" alt="Spraudņa/Tēmas attēls" class="w-full h-64 object-cover" onclick="redirectToGoogle('${encodeURIComponent(product.name)}');" style="cursor: pointer;">
+                    <img src="${product.image_url}" class="w-full h-64 object-cover" onclick="redirectToGoogle('${encodeURIComponent(product.name)}');" style="cursor: pointer;">
                     <div class="p-4 flex flex-col justify-between flex-grow">
                         <div>
                         <h3 class="text-lg font-bold my-2 flex items-center mb-4" onclick="redirectToGoogle('${encodeURIComponent(product.name)}');" style="cursor: pointer;">${product.name}</h3>
