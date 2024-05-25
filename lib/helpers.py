@@ -21,7 +21,8 @@ def convert_external_url_to_amazon(image_url):
     if not image_url:
         return None
     filename = os.path.basename(urlparse(image_url).path)
-    return f"https://{AWS_BUCKET_NAME}.s3.{AWS_REGION}.amazonaws.com/public/{filename}"
+    filename_webp = f"{os.path.splitext(filename)[0]}.webp"
+    return f"https://{AWS_BUCKET_NAME}.s3.{AWS_REGION}.amazonaws.com/public/{filename_webp}"
 
 def str_to_bool(s):
     return s.lower() in ('true', '1', 't', 'y', 'yes')

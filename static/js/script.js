@@ -25,7 +25,6 @@ function redirectToGoogle(productName) {
 	document.body.removeChild(a);
 }
 
-
 function loadProducts(reset = false) {
 	if (isLoading) return;
 	isLoading = true;
