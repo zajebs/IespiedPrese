@@ -1,5 +1,5 @@
 import os
-from flask import Flask, send_from_directory
+from flask import Flask, send_from_directory, request
 from flask_bcrypt import Bcrypt
 from flask_htmlmin import HTMLMIN
 from lib.config import SECRET_KEY
@@ -28,7 +28,7 @@ def create_app():
 
     @app.after_request
     def add_header(response):
-        if 'Cache-Control' not in response.headers:
+        if request.path.startswith('/static/'):
             expires = datetime.utcnow() + timedelta(days=CACHE_AGE)
             response.headers['Expires'] = expires.strftime("%a, %d %b %Y %H:%M:%S GMT")
             response.headers['Cache-Control'] = f'public, max-age={CACHE_AGE*60*60*24}'
