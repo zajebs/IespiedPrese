@@ -8,10 +8,12 @@ import boto3
 from botocore.exceptions import NoCredentialsError, ClientError
 from PIL import Image
 from io import BytesIO
+from datetime import datetime, timedelta, timezone
 
 load_dotenv()
 
 DATABASE_URL = os.getenv('DATABASE_URL')
+CACHE_AGE = int(os.getenv('CACHE_AGE', '365'))
 
 result = urlparse(DATABASE_URL)
 username = result.username
@@ -49,13 +51,13 @@ def release_db_connection(conn):
 def generate_s3_url(bucket_name, region, file_name):
     return f"https://{bucket_name}.s3.{region}.amazonaws.com/public/{file_name}"
 
-def compress_image(image_data, target_size_kb, max_resolution=(400, 400)):
+def compress_image(image_data, target_size_kb, max_resolution=(350, 350)):
     img = Image.open(BytesIO(image_data))
     
     img.thumbnail(max_resolution, Image.LANCZOS)
     
     output = BytesIO()
-    quality = 80
+    quality = 70
 
     while True:
         output.seek(0)
@@ -110,7 +112,15 @@ def download_images():
                 if response.status_code == 200:
                     compressed_image = compress_image(response.content, 10)
                     compressed_image.seek(0)
-                    s3.upload_fileobj(compressed_image, AWS_BUCKET_NAME, s3_key)
+
+                    cache_control = f'public, max-age={CACHE_AGE * 24 * 60 * 60}'
+                    expires = (datetime.now(timezone.utc) + timedelta(days=CACHE_AGE)).strftime("%a, %d %b %Y %H:%M:%S GMT")
+
+                    s3.upload_fileobj(compressed_image, AWS_BUCKET_NAME, s3_key,
+                                      ExtraArgs={
+                                          'CacheControl': cache_control,
+                                          'Expires': expires
+                                      })
                     s3_url = generate_s3_url(AWS_BUCKET_NAME, AWS_REGION, filename_webp)
                     s3_urls.append(s3_url)
                     print(f'Uploaded and compressed {filename_webp} to S3')

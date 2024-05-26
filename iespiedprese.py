@@ -29,17 +29,17 @@ def create_app():
     @app.after_request
     def add_header(response):
         if 'Cache-Control' not in response.headers:
-            expires = datetime.utcnow() + timedelta(days=365)
+            expires = datetime.utcnow() + timedelta(days=CACHE_AGE)
             response.headers['Expires'] = expires.strftime("%a, %d %b %Y %H:%M:%S GMT")
-            response.headers['Cache-Control'] = f'public, max-age={CACHE_AGE}'
+            response.headers['Cache-Control'] = f'public, max-age={CACHE_AGE*60*60*24}'
         return response
 
     @app.route('/static/<path:filename>')
     def custom_static(filename):
         response = send_from_directory(app.static_folder, filename)
-        expires = datetime.utcnow() + timedelta(days=365)
+        expires = datetime.utcnow() + timedelta(days=CACHE_AGE)
         response.headers['Expires'] = expires.strftime("%a, %d %b %Y %H:%M:%S GMT")
-        response.headers['Cache-Control'] = f'public, max-age={CACHE_AGE}'
+        response.headers['Cache-Control'] = f'public, max-age={CACHE_AGE*60*60*24}'
         return response
 
     return app
