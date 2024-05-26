@@ -67,3 +67,5 @@ static/images/*
 .idea/
 .vscode/
 .DS_Store
+*tailwind*
+!tailwind.min.css
