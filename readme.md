@@ -35,6 +35,7 @@ Lai palaistu šo projektu lokāli, seko šiem soļiem:
    BUCKETEER_AWS_REGION=eu-west-1=  
    BUCKETEER_BUCKET_NAME=  
    CACHE_AGE=[dienas, piemēram 365]  
+   GA_MEASUREMENT_ID=Google ID no Analytics
 
 7. Izmanto skriptus, lai iegūtu sākotnējos datus:  
    python cron_scripts\full_update.py  

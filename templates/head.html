@@ -23,6 +23,14 @@
 <link rel="stylesheet" href="{{ url_for('static', filename='styles/toggle.css') }}">
 <link rel="stylesheet" href="{{ url_for('static', filename='styles/promo.css') }}">
 
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-J6LRE4Y6X2"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', '{{ GA_MEASUREMENT_ID }}');
+</script>
+
 <style>
   html {
     visibility: hidden;
