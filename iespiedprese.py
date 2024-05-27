@@ -16,6 +16,7 @@ PORT = int(os.getenv('PORT'))
 DEBUG = str_to_bool(os.getenv('DEBUG', 'False'))
 CACHE_AGE = int(os.getenv('CACHE_AGE'))
 GA_MEASUREMENT_ID = (os.getenv('GA_MEASUREMENT_ID'))
+GA_CSS_PATH = (os.getenv('GA_CSS_PATH'))
 
 def create_app():
     app = Flask(__name__)
@@ -29,7 +30,7 @@ def create_app():
 
     @app.context_processor
     def inject_ga_measurement_id():
-        return dict(GA_MEASUREMENT_ID=GA_MEASUREMENT_ID)
+        return dict(GA_MEASUREMENT_ID=GA_MEASUREMENT_ID, GA_CSS_PATH=GA_CSS_PATH)
 
     @app.after_request
     def add_header(response):
