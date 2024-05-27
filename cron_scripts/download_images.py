@@ -51,7 +51,7 @@ def release_db_connection(conn):
 def generate_s3_url(bucket_name, region, file_name):
     return f"https://{bucket_name}.s3.{region}.amazonaws.com/public/{file_name}"
 
-def compress_image(image_data, target_size_kb, max_resolution=(350, 350)):
+def compress_image(image_data, target_size_kb, max_resolution=(256, 256)):
     img = Image.open(BytesIO(image_data))
     
     img.thumbnail(max_resolution, Image.LANCZOS)
@@ -110,7 +110,7 @@ def download_images():
 
                 response = requests.get(image_url, stream=True)
                 if response.status_code == 200:
-                    compressed_image = compress_image(response.content, 10)
+                    compressed_image = compress_image(response.content, 5)
                     compressed_image.seek(0)
 
                     cache_control = f'public, max-age={CACHE_AGE * 24 * 60 * 60}'
