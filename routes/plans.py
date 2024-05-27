@@ -6,11 +6,6 @@ import datetime
 
 plans_bp = Blueprint('plans', __name__)
 
-plans = {
-    1: {'price': 1000, 'description': "Pamata Plāns - 1 mēnesis"},
-    2: {'price': 2500, 'description': "Premium Plāns - 1 mēnesis"}
-}
-
 @plans_bp.route('/plans')
 def show_plans():
     return render_template('plans.html')
@@ -18,6 +13,11 @@ def show_plans():
 @plans_bp.route('/plan/<int:plan_id>')
 @login_required
 def process_payment(plan_id):
+    plans = {
+        1: {'price': 1000, 'description': "Pamata Plāns - 1 mēnesis"},
+        2: {'price': 2500, 'description': "Premium Plāns - 1 mēnesis"}
+    }
+    
     if plan_id not in plans:
         flash('Tāda plāna pagaidām vēl nav!', 'error')
         return redirect(url_for('index.index'))
