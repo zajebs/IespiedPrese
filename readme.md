@@ -33,7 +33,7 @@ Lai palaistu šo projektu lokāli, seko šiem soļiem:
    BUCKETEER_AWS_ACCESS_KEY_ID=  
    BUCKETEER_AWS_SECRET_ACCESS_KEY=  
    BUCKETEER_AWS_REGION=eu-west-1=  
-   BUCKETEER_BUCKET_NAME=
+   BUCKETEER_BUCKET_NAME=  
    CACHE_AGE=[dienas, piemēram 365]  
 
 7. Izmanto skriptus, lai iegūtu sākotnējos datus:  
