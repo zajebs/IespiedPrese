@@ -41,6 +41,10 @@ def create_app():
         response.headers['Expires'] = expires.strftime("%a, %d %b %Y %H:%M:%S GMT")
         response.headers['Cache-Control'] = f'public, max-age={CACHE_AGE*60*60*24}'
         return response
+    
+    @app.route('/robots.txt')
+    def robots_txt():
+        return send_from_directory(app.static_folder, 'robots.txt')
 
     return app
 
