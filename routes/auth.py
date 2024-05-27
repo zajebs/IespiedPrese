@@ -5,6 +5,7 @@ from lib.database import get_db_connection
 from lib.models import User
 from flask_bcrypt import Bcrypt
 import psycopg2
+import re
 
 auth_bp = Blueprint('auth', __name__)
 bcrypt = Bcrypt()
@@ -15,6 +16,10 @@ def register():
         username = request.form['username']
         email = request.form['email']
         password = request.form['password']
+
+        if not re.match(r'^[a-zA-Z0-9_]+$', username):
+            flash('Lietotājvārds drīkst saturēt tikai A-Z, ciparus un apakšsvītru!', 'error')
+            return render_template('register.html')
 
         if len(username) < 5:
             flash('Lietotājvārdam jābūt vismaz 5 simbolu garam!', 'error')
