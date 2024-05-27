@@ -58,14 +58,20 @@
           gtag('config', '{{ GA_MEASUREMENT_ID }}');
       }
 
-      if ('requestIdleCallback' in window) {
-          requestIdleCallback(function() {
-              loadScript('https://www.googletagmanager.com/gtag/js?id={{ GA_MEASUREMENT_ID }}', initializeAnalytics);
-          });
-      } else {
-          setTimeout(function() {
-              loadScript('https://www.googletagmanager.com/gtag/js?id={{ GA_MEASUREMENT_ID }}', initializeAnalytics);
-          }, 2000);
+      function loadGTM() {
+          if ('requestIdleCallback' in window) {
+              requestIdleCallback(function() {
+                  loadScript('https://www.googletagmanager.com/gtag/js?id={{ GA_MEASUREMENT_ID }}', initializeAnalytics);
+              });
+          } else {
+              setTimeout(function() {
+                  loadScript('https://www.googletagmanager.com/gtag/js?id={{ GA_MEASUREMENT_ID }}', initializeAnalytics);
+              }, 2000);
+          }
+      }
+
+      if (window.location.pathname.includes('specific-path')) {
+          loadGTM();
       }
 
       window.addEventListener('load', function() {
