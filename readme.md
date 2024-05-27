@@ -29,8 +29,14 @@ Lai palaistu šo projektu lokāli, seko šiem soļiem:
    SECRET_KEY=[jebkāda atslēga/parole]  
    PORT=[80 vai 443]  
    DEBUG=[True vai False]
+   DATABASE_URL=[postgres pilns links]
+   BUCKETEER_AWS_ACCESS_KEY_ID=  
+   BUCKETEER_AWS_SECRET_ACCESS_KEY=  
+   BUCKETEER_AWS_REGION=eu-west-1=  
+   BUCKETEER_BUCKET_NAME=
+   CACHE_AGE=[dienas, piemēram 365]  
 
-6. Izmanto skriptus, lai iegūtu sākotnējos datus:  
+7. Izmanto skriptus, lai iegūtu sākotnējos datus:  
    python cron_scripts\full_update.py  
    python cron_scripts\download_images.py
 
