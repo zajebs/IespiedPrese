@@ -7,8 +7,8 @@ import datetime
 plans_bp = Blueprint('plans', __name__)
 
 plans = {
-    1: {'price': 1000, 'description': "Pamata Plāns - 10 EUR mēnesī"},
-    2: {'price': 2500, 'description': "Premium Plāns - 25 EUR mēnesī"}
+    1: {'price': 1000, 'description': "Pamata Plāns - 1 mēnesis"},
+    2: {'price': 2500, 'description': "Premium Plāns - 1 mēnesis"}
 }
 
 @plans_bp.route('/plans')
