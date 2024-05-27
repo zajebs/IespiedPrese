@@ -24,6 +24,7 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 });
 
+
 function toggleMenu() {
     var menu = document.getElementById('mobile-menu');
     if (menu.classList.contains('hidden')) {
