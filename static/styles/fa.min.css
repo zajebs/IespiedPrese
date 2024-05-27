@@ -4,10 +4,17 @@
     font-weight: 900;
     font-display: swap;
     src: url('https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/webfonts/fa-solid-900.woff2') format('woff2');
-  }
-  
-  .fa,
-  .fas {
+}
+
+@font-face {
+    font-family: 'Font Awesome 5 Brands';
+    font-style: normal;
+    font-weight: 400;
+    font-display: swap;
+    src: url('https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/webfonts/fa-brands-400.woff2') format('woff2');
+}
+
+.fa, .fas {
     -moz-osx-font-smoothing: grayscale;
     -webkit-font-smoothing: antialiased;
     display: inline-block;
@@ -15,71 +22,75 @@
     font-variant: normal;
     text-rendering: auto;
     line-height: 1;
-  }
-  
-  .fas {
+}
+
+.fas {
     font-family: 'Font Awesome 5 Free';
     font-weight: 900;
-  }
-  
-  /* Icon Styles */
-  .fa-eye:before {
+}
+
+.fab {
+    font-family: 'Font Awesome 5 Brands';
+    font-weight: 400;
+}
+
+/* Icon Styles */
+.fa-eye:before {
     content: "\f06e";
-  }
-  
-  .fa-eye-slash:before {
+}
+
+.fa-eye-slash:before {
     content: "\f070";
-  }
-  
-  .fa-user-circle:before {
+}
+
+.fa-user-circle:before {
     content: "\f2bd";
-  }
-  
-  .fa-tags:before {
+}
+
+.fa-tags:before {
     content: "\f02c";
-  }
-  
-  .fa-code-branch:before {
+}
+
+.fa-code-branch:before {
     content: "\f126";
-  }
-  
-  .fa-calendar-alt:before {
+}
+
+.fa-calendar-alt:before {
     content: "\f073";
-  }
-  
-  .fa-download:before {
+}
+
+.fa-download:before {
     content: "\f019";
-  }
-  
-  .fa-envelope:before {
+}
+
+.fa-envelope:before {
     content: "\f0e0";
-  }
-  
-  .fa-telegram-plane:before {
+}
+
+.fa-telegram-plane:before {
     content: "\f3fe";
-  }
-  
-  .fa-whatsapp:before {
+}
+
+.fa-whatsapp:before {
     content: "\f232";
-  }
-  
-  .fa-sign-out-alt:before {
+}
+
+.fa-sign-out-alt:before {
     content: "\f2f5";
-  }
-  
-  .fa-shopping-cart:before {
+}
+
+.fa-shopping-cart:before {
     content: "\f07a";
-  }
-  
-  .fa-calendar-day:before {
+}
+
+.fa-calendar-day:before {
     content: "\f783";
-  }
-  
-  .fa-sign-in-alt:before {
+}
+
+.fa-sign-in-alt:before {
     content: "\f2f6";
-  }
-  
-  .fa-user-plus:before {
+}
+
+.fa-user-plus:before {
     content: "\f234";
-  }
-  
+}
