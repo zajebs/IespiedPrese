@@ -29,7 +29,6 @@ Lai palaistu šo projektu lokāli, seko šiem soļiem:
    SECRET_KEY=[jebkāda atslēga/parole]  
    PORT=[80 vai 443]  
    DEBUG=[True vai False]  
-   SSL_ENABLED=[True vai False]  
    DATABASE_URL=[postgres pilns links]  
    BUCKETEER_AWS_ACCESS_KEY_ID=  
    BUCKETEER_AWS_SECRET_ACCESS_KEY=  
