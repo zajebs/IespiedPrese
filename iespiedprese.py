@@ -1,24 +1,22 @@
 import os
-from datetime import datetime, timedelta
-from dotenv import load_dotenv
-from flask import Flask, send_from_directory, request, redirect, url_for
+from flask import Flask, send_from_directory, request
 from flask_bcrypt import Bcrypt
 from flask_htmlmin import HTMLMIN
-from flask_squeeze import Squeeze
-from flask_talisman import Talisman
 from lib.config import SECRET_KEY
 from lib.login_manager import init_login_manager
 from lib.blueprints import register_blueprints
 from lib.helpers import str_to_bool
+from dotenv import load_dotenv
+from flask_squeeze import Squeeze
+from datetime import datetime, timedelta
 
 squeeze = Squeeze()
 load_dotenv()
 PORT = int(os.getenv('PORT'))
 DEBUG = str_to_bool(os.getenv('DEBUG', 'False'))
 CACHE_AGE = int(os.getenv('CACHE_AGE'))
-GA_MEASUREMENT_ID = os.getenv('GA_MEASUREMENT_ID')
-SPECIFIC_PATH = os.getenv('SPECIFIC_PATH')
-SSL_ENABLED = str_to_bool(os.getenv('SSL_ENABLED', 'True'))
+GA_MEASUREMENT_ID = (os.getenv('GA_MEASUREMENT_ID'))
+SPECIFIC_PATH = (os.getenv('SPECIFIC_PATH'))
 
 def create_app():
     app = Flask(__name__)
@@ -29,21 +27,6 @@ def create_app():
     Bcrypt(app)
     init_login_manager(app)
     register_blueprints(app)
-    
-    if SSL_ENABLED:
-        Talisman(app, content_security_policy=None)
-    
-    @app.before_request
-    def before_request():
-        # Check if request is secure and SSL is enabled
-        if SSL_ENABLED and not request.is_secure:
-            # Redirect to HTTPS
-            url = request.url.replace("http://", "https://", 1)
-            return redirect(url, code=301)
-        # Ensure non-looping redirect
-        if request.url.startswith('http://') and not request.url.startswith('https://'):
-            secure_url = request.url.replace('http://', 'https://', 1)
-            return redirect(secure_url, code=301)
 
     @app.context_processor
     def inject_ga_measurement_id():
@@ -64,7 +47,7 @@ def create_app():
         response.headers['Expires'] = expires.strftime("%a, %d %b %Y %H:%M:%S GMT")
         response.headers['Cache-Control'] = f'public, max-age={CACHE_AGE*60*60*24}'
         return response
-
+    
     @app.route('/robots.txt')
     def robots_txt():
         return send_from_directory(app.static_folder, 'robots.txt')
