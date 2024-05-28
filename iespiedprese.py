@@ -1,7 +1,7 @@
 import os
 from datetime import datetime, timedelta
 from dotenv import load_dotenv
-from flask import Flask, send_from_directory, request
+from flask import Flask, send_from_directory, request, redirect
 from flask_bcrypt import Bcrypt
 from flask_htmlmin import HTMLMIN
 from flask_squeeze import Squeeze
@@ -15,10 +15,10 @@ squeeze = Squeeze()
 load_dotenv()
 PORT = int(os.getenv('PORT'))
 DEBUG = str_to_bool(os.getenv('DEBUG', 'False'))
-SSL_ENABLED = str_to_bool(os.getenv('SSL_ENABLED', 'True'))
 CACHE_AGE = int(os.getenv('CACHE_AGE'))
-GA_MEASUREMENT_ID = (os.getenv('GA_MEASUREMENT_ID'))
-SPECIFIC_PATH = (os.getenv('SPECIFIC_PATH'))
+GA_MEASUREMENT_ID = os.getenv('GA_MEASUREMENT_ID')
+SPECIFIC_PATH = os.getenv('SPECIFIC_PATH')
+SSL_ENABLED = str_to_bool(os.getenv('SSL_ENABLED', 'True'))
 
 def create_app():
     app = Flask(__name__)
@@ -29,8 +29,15 @@ def create_app():
     Bcrypt(app)
     init_login_manager(app)
     register_blueprints(app)
+    
     if SSL_ENABLED:
         Talisman(app)
+    
+    @app.before_request
+    def before_request():
+        if not request.is_secure and SSL_ENABLED:
+            url = request.url.replace("http://", "https://", 1)
+            return redirect(url, code=301)
 
     @app.context_processor
     def inject_ga_measurement_id():
@@ -51,7 +58,7 @@ def create_app():
         response.headers['Expires'] = expires.strftime("%a, %d %b %Y %H:%M:%S GMT")
         response.headers['Cache-Control'] = f'public, max-age={CACHE_AGE*60*60*24}'
         return response
-    
+
     @app.route('/robots.txt')
     def robots_txt():
         return send_from_directory(app.static_folder, 'robots.txt')
