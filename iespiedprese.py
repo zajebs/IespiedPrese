@@ -1,7 +1,7 @@
 import os
 from datetime import datetime, timedelta
 from dotenv import load_dotenv
-from flask import Flask, send_from_directory, request, redirect
+from flask import Flask, send_from_directory, request, redirect, url_for
 from flask_bcrypt import Bcrypt
 from flask_htmlmin import HTMLMIN
 from flask_squeeze import Squeeze
@@ -31,13 +31,19 @@ def create_app():
     register_blueprints(app)
     
     if SSL_ENABLED:
-        Talisman(app)
+        Talisman(app, content_security_policy=None)
     
     @app.before_request
     def before_request():
-        if not request.is_secure and SSL_ENABLED:
+        # Check if request is secure and SSL is enabled
+        if SSL_ENABLED and not request.is_secure:
+            # Redirect to HTTPS
             url = request.url.replace("http://", "https://", 1)
             return redirect(url, code=301)
+        # Ensure non-looping redirect
+        if request.url.startswith('http://') and not request.url.startswith('https://'):
+            secure_url = request.url.replace('http://', 'https://', 1)
+            return redirect(secure_url, code=301)
 
     @app.context_processor
     def inject_ga_measurement_id():
