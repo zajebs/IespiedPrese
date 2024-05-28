@@ -1,19 +1,21 @@
 import os
+from datetime import datetime, timedelta
+from dotenv import load_dotenv
 from flask import Flask, send_from_directory, request
 from flask_bcrypt import Bcrypt
 from flask_htmlmin import HTMLMIN
+from flask_squeeze import Squeeze
+from flask_talisman import Talisman
 from lib.config import SECRET_KEY
 from lib.login_manager import init_login_manager
 from lib.blueprints import register_blueprints
 from lib.helpers import str_to_bool
-from dotenv import load_dotenv
-from flask_squeeze import Squeeze
-from datetime import datetime, timedelta
 
 squeeze = Squeeze()
 load_dotenv()
 PORT = int(os.getenv('PORT'))
 DEBUG = str_to_bool(os.getenv('DEBUG', 'False'))
+SSL_ENABLED = str_to_bool(os.getenv('SSL_ENABLED', 'True'))
 CACHE_AGE = int(os.getenv('CACHE_AGE'))
 GA_MEASUREMENT_ID = (os.getenv('GA_MEASUREMENT_ID'))
 SPECIFIC_PATH = (os.getenv('SPECIFIC_PATH'))
@@ -27,6 +29,8 @@ def create_app():
     Bcrypt(app)
     init_login_manager(app)
     register_blueprints(app)
+    if SSL_ENABLED:
+        Talisman(app)
 
     @app.context_processor
     def inject_ga_measurement_id():
