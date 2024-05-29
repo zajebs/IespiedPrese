@@ -144,11 +144,11 @@ def get_latest_versions(all_downloads):
     return latest_versions
 
 def count_updatable_products(all_downloads, latest_versions):
-    updatable_count = 0
+    updatable_products = set()
     for row in all_downloads:
         product_name = row[1]
         downloaded_version = row[2]
         current_version = row[3]
         if (downloaded_version == latest_versions[product_name]) and (parse_version(downloaded_version) < parse_version(current_version)):
-            updatable_count += 1
-    return updatable_count
+            updatable_products.add(product_name)
+    return len(updatable_products)
