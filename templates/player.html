@@ -5,11 +5,13 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{{ player }}</title>
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
+    <link rel="icon" type="image/svg" href="{{ url_for('static', filename='bmw.svg') }}">
 </head>
 <body>
     <div class="container">
         <h1 class="text-center my-4">{{ player }}</h1>
-        <h3 class="text-center my-4">Kāds būtu mans ieguvums katrā spēlē, ja es liktu 10 EUR?</h3>
+        <h3 class="text-center my-4">{{placed}} {{placed_games}}/{{total_games}} likmes ({{placed_percentage}}%)<br><b>{{sentence}}!</b></h2>
+        <h3 class="text-center my-4">Kāds būtu ieguvums katrā spēlē, ja liktu 10 EUR?</h3>
         <table class="table table-striped table-bordered">
             <thead class="thead-dark">
                 <tr>

@@ -118,7 +118,6 @@ def create_app():
         try:
             service = build('sheets', 'v4', developerKey=GOOGLE_API_KEY)
             sheet = service.spreadsheets()
-
             headers_data = sheet.values().get(spreadsheetId=GOOGLE_SPREADSHEET_ID,
                                             range='Results!I1:T1').execute()
             headers = headers_data.get('values', [])[0]
@@ -134,6 +133,18 @@ def create_app():
 
             column_index = player_index + 8
 
+            all_results_data = sheet.values().get(spreadsheetId=GOOGLE_SPREADSHEET_ID,
+                                                range='Results!A:T').execute()
+            all_results_values = all_results_data.get('values', [])
+
+            if not all_results_values:
+                return jsonify({"error": "No data found in Results."})
+
+            total_games = 0
+            for row in all_results_values[1:]:
+                if len(row) > 7 and row[7] and row[7] != 'TBD':
+                    total_games += 1
+
             results_data = sheet.values().get(spreadsheetId=GOOGLE_SPREADSHEET_ID,
                                             range=GOOGLE_PLAYER_RANGE).execute()
             results_values = results_data.get('values', [])
@@ -145,7 +156,7 @@ def create_app():
             for row in results_values:
                 if len(row) > column_index:
                     result = row[7] if len(row) > 7 else None
-                    if result != 'TBD':
+                    if result and result != 'TBD':
                         prediction = row[column_index] if len(row) > column_index else None
                         if prediction:
                             win = result == prediction if result and prediction else False
@@ -174,7 +185,33 @@ def create_app():
                                 "money": money
                             }
                             data.append(game_data)
-            return render_template('player.html', data=data, player=name)
+
+            male = not name.endswith('a')
+            placed = ""
+            placed_games = len(data)
+            placed_percentage = (placed_games / total_games) * 100 if total_games > 0 else 0
+            placed_percentage = int(placed_percentage)
+            sentence = ""
+            if placed_percentage < 50:
+                sentence = "Nepiedalās apbalvošanā"
+            elif 50 <= placed_percentage < 75:
+                if male:
+                    sentence = "Varētu būt aktīvāks"
+                else:
+                    sentence = "Varētu būt aktīvāka"
+            elif 76 <= placed_percentage < 99:
+                sentence = "Lieliska aktivitāte"
+            else:
+                if male:
+                    sentence = "Nav izlaidis NEVIENU spēli"
+                else:
+                    sentence = "Nav izlaidusi NEVIENU spēli"
+            if male:
+                placed = "Veicis"
+            else:
+                placed = "Veikusi"
+
+            return render_template('player.html', data=data, player=name, total_games=total_games, placed_games=placed_games, placed_percentage=placed_percentage, sentence=sentence, placed=placed)
         except Exception as e:
             return jsonify({"error": str(e)})
 

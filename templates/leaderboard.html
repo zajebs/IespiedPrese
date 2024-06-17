@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>La Familia leaderboard</title>
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
+    <link rel="icon" type="image/svg" href="{{ url_for('static', filename='bmw.svg') }}">
 </head>
 <body>
     <div class="container">
@@ -28,7 +29,8 @@
                 {% endfor %}
             </tbody>
         </table>
-        <p class="text-center mt-4 text-s font-weight-bold">Atjaunināts līdz spēlei: {{ last_updated_game[0] }} {{ last_updated_game[1] }} {{ last_updated_game[2] }} vs {{ last_updated_game[3] }}</p>
+        <p class="text-center mt-4 text-m font-weight-bold">APBALVOŠANĀ PIEDALĀS TIE, KAM IR VISMAZ 50% AKTIVITĀTE!</p>
+        <p class="text-center mt-2 text-s font-weight-bold">Atjaunināts līdz spēlei: {{ last_updated_game[0] }} {{ last_updated_game[1] }} {{ last_updated_game[2] }} vs {{ last_updated_game[3] }}</p>
         <div style="text-align: center;" class="mt-4">
             <a href="https://docs.google.com/spreadsheets/d/1MRxo0eSDsBTgznVJQD9RUW-dv4HFGTvNMTDj9YfSxAE/" class="btn btn-primary" role="button">Google Sheet</a>
             <a href="https://www.flashscore.com/football/europe/euro/" class="btn btn-secondary" role="button">Flashscore</a>
