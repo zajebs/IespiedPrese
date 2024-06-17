@@ -1,5 +1,6 @@
 import os
-from flask import Flask, send_from_directory, request
+import re
+from flask import Flask, send_from_directory, request, jsonify, render_template
 from flask_bcrypt import Bcrypt
 from flask_htmlmin import HTMLMIN
 from lib.config import SECRET_KEY
@@ -9,6 +10,7 @@ from lib.helpers import str_to_bool
 from dotenv import load_dotenv
 from flask_squeeze import Squeeze
 from datetime import datetime, timedelta
+from googleapiclient.discovery import build
 
 squeeze = Squeeze()
 load_dotenv()
@@ -17,6 +19,13 @@ DEBUG = str_to_bool(os.getenv('DEBUG', 'False'))
 CACHE_AGE = int(os.getenv('CACHE_AGE'))
 GA_MEASUREMENT_ID = (os.getenv('GA_MEASUREMENT_ID'))
 SPECIFIC_PATH = (os.getenv('SPECIFIC_PATH'))
+GOOGLE_API_KEY = (os.getenv('GOOGLE_API_KEY'))
+GOOGLE_SPREADSHEET_ID = (os.getenv('GOOGLE_SPREADSHEET_ID'))
+GOOGLE_RANGE_NAME = (os.getenv('GOOGLE_RANGE_NAME'))
+GOOGLE_RESULTS_RANGE = (os.getenv('GOOGLE_RESULTS_RANGE'))
+
+def remove_emoji(text):
+    return re.sub(r'[^\w\s,.-]', '', text)
 
 def create_app():
     app = Flask(__name__)
@@ -51,6 +60,57 @@ def create_app():
     @app.route('/robots.txt')
     def robots_txt():
         return send_from_directory(app.static_folder, 'robots.txt')
+
+    @app.route('/la-familia', methods=['GET'])
+    def get_table():
+        try:
+            service = build('sheets', 'v4', developerKey=GOOGLE_API_KEY)
+            sheet = service.spreadsheets()
+
+            result = sheet.values().get(spreadsheetId=GOOGLE_SPREADSHEET_ID,
+                                        range=GOOGLE_RANGE_NAME).execute()
+            values = result.get('values', [])
+
+            if not values:
+                return jsonify({"error": "No data found in Leaderbord."})
+
+            results_data = sheet.values().get(spreadsheetId=GOOGLE_SPREADSHEET_ID,
+                                            range=GOOGLE_RESULTS_RANGE).execute()
+            results_values = results_data.get('values', [])
+
+            if not results_values:
+                return jsonify({"error": "No data found in Results."})
+
+            last_updated_game = None
+            for row in results_values:
+                if len(row) > 7 and row[7] != "TBD":
+                    last_updated_game = row[:4]
+
+            if not last_updated_game:
+                return jsonify({"error": "No updated game found."})
+
+            values = sorted(values, key=lambda x: float(x[1].replace(',', '.')), reverse=True)
+            ranks = []
+            previous_value = None
+            previous_rank = 0
+            for index, (name, value) in enumerate(values):
+                current_value = float(value.replace(',', '.'))
+                if current_value == previous_value:
+                    rank = previous_rank
+                else:
+                    rank = index + 1
+                cleaned_name = remove_emoji(name)
+                if current_value > 0:
+                    formatted_value = f"+€{value}"
+                else:
+                    formatted_value = f"-€{abs(current_value):,.2f}".replace('.', ',')
+                ranks.append((rank, cleaned_name, formatted_value))
+                previous_value = current_value
+                previous_rank = rank
+
+            return render_template('leaderboard.html', data=ranks, last_updated_game=last_updated_game)
+        except Exception as e:
+            return jsonify({"error": str(e)})
 
     return app
 

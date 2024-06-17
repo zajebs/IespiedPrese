@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>La Familia leaderboard</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
+</head>
+<body>
+    <div class="container">
+        <h1 class="text-center my-4">La Familia leaderboard</h1>
+        <h3 class="text-center my-4">Kāda būtu mana bilance, ja es uz katru spēli liktu 10 EUR?</h3>
+        <table class="table table-striped table-bordered">
+            <thead class="thead-dark">
+                <tr>
+                    <th scope="col">Vieta</th>
+                    <th scope="col">Vārds</th>
+                    <th scope="col">Rezultāts</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for rank, name, value in data %}
+                <tr>
+                    <th scope="row">{{ rank }}</th>
+                    <td>{{ name }}</td>
+                    <td>{{ value }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        <p class="text-center mt-4 text-s font-weight-bold">Atjaunināts līdz spēlei: {{ last_updated_game[0] }} {{ last_updated_game[1] }} {{ last_updated_game[2] }} vs {{ last_updated_game[3] }}</p>
+    </div>
+</body>
+</html>
