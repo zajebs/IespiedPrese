@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ player }}</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
+</head>
+<body>
+    <div class="container">
+        <h1 class="text-center my-4">{{ player }}</h1>
+        <h3 class="text-center my-4">Kāds būtu mans ieguvums katrā spēlē, ja es liktu 10 EUR?</h3>
+        <table class="table table-striped table-bordered">
+            <thead class="thead-dark">
+                <tr>
+                    <th scope="col">Datums</th>
+                    <th scope="col">Laiks</th>
+                    <th scope="col">Home</th>
+                    <th scope="col">Away</th>
+                    <th scope="col">Odds 1</th>
+                    <th scope="col">Odds X</th>
+                    <th scope="col">Odds 2</th>
+                    <th scope="col">Rezultāts</th>
+                    <th scope="col">Minējums</th>
+                    <th scope="col">Uzvarēja?</th>
+                    <th scope="col">Ieguvums</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for game in data %}
+                <tr>
+                    <td>{{ game.date }}</td>
+                    <td>{{ game.time }}</td>
+                    <td>{{ game.home }}</td>
+                    <td>{{ game.away }}</td>
+                    <td>{{ game.odds1 }}</td>
+                    <td>{{ game.oddsX }}</td>
+                    <td>{{ game.odds2 }}</td>
+                    <td>{{ game.result }}</td>
+                    <td>{{ game.prediction }}</td>
+                    <td>{{ game.win }}</td>
+                    <td>{{ game.money }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        <div style="text-align: center;" class="mt-4">
+            <a href="https://docs.google.com/spreadsheets/d/1MRxo0eSDsBTgznVJQD9RUW-dv4HFGTvNMTDj9YfSxAE/" class="btn btn-primary" role="button">Google Sheet</a>
+            <a href="https://www.flashscore.com/football/europe/euro/" class="btn btn-secondary" role="button">Flashscore</a>
+            <a href="/la-familia" class="btn btn-info" role="button">Atgriezties</a>
+        </div>        
+    </div>
+</body>
+</html>

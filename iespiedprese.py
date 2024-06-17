@@ -23,6 +23,7 @@ GOOGLE_API_KEY = (os.getenv('GOOGLE_API_KEY'))
 GOOGLE_SPREADSHEET_ID = (os.getenv('GOOGLE_SPREADSHEET_ID'))
 GOOGLE_RANGE_NAME = (os.getenv('GOOGLE_RANGE_NAME'))
 GOOGLE_RESULTS_RANGE = (os.getenv('GOOGLE_RESULTS_RANGE'))
+GOOGLE_PLAYER_RANGE = (os.getenv('GOOGLE_PLAYER_RANGE'))
 
 def remove_emoji(text):
     return re.sub(r'[^\w\s,.-]', '', text)
@@ -109,6 +110,73 @@ def create_app():
                 previous_rank = rank
 
             return render_template('leaderboard.html', data=ranks, last_updated_game=last_updated_game)
+        except Exception as e:
+            return jsonify({"error": str(e)})
+
+    @app.route('/player/<name>', methods=['GET'])
+    def get_player_data(name):
+        try:
+            service = build('sheets', 'v4', developerKey=GOOGLE_API_KEY)
+            sheet = service.spreadsheets()
+
+            headers_data = sheet.values().get(spreadsheetId=GOOGLE_SPREADSHEET_ID,
+                                            range='Results!I1:T1').execute()
+            headers = headers_data.get('values', [])[0]
+            print("Headers:", headers)
+
+            player_index = None
+            for i, header in enumerate(headers):
+                print(f"Checking header {i}: {header}")
+                if header.strip().lower() == name.lower():
+                    player_index = i
+                    break
+
+            if player_index is None:
+                return jsonify({"error": "Player not found."})
+
+            column_index = player_index + 8
+            print(f"Column index for {name}: {column_index}")
+
+            results_data = sheet.values().get(spreadsheetId=GOOGLE_SPREADSHEET_ID,
+                                            range=GOOGLE_PLAYER_RANGE).execute()
+            results_values = results_data.get('values', [])
+
+            if not results_values:
+                return jsonify({"error": "No data found in Results."})
+
+            data = []
+            for row in results_values:
+                if len(row) > column_index:
+                    result = row[7] if len(row) > 7 else None
+                    prediction = row[column_index] if len(row) > column_index else None
+                    if prediction:
+                        win = result == prediction if result and prediction else False
+                        money = 0
+                        if win:
+                            if prediction == "1":
+                                money = round((float(row[4].replace(',', '.')) - 1) * 10, 2)
+                            elif prediction == "x":
+                                money = round((float(row[5].replace(',', '.')) - 1) * 10, 2)
+                            elif prediction == "2":
+                                money = round((float(row[6].replace(',', '.')) - 1) * 10, 2)
+                        else:
+                            money = -10
+
+                        game_data = {
+                            "date": row[0] if len(row) > 0 else "",
+                            "time": row[1] if len(row) > 1 else "",
+                            "home": row[2] if len(row) > 2 else "",
+                            "away": row[3] if len(row) > 3 else "",
+                            "odds1": row[4] if len(row) > 4 else "",
+                            "oddsX": row[5] if len(row) > 5 else "",
+                            "odds2": row[6] if len(row) > 6 else "",
+                            "result": result,
+                            "prediction": prediction,
+                            "win": win,
+                            "money": money
+                        }
+                        data.append(game_data)
+            return render_template('player.html', data=data, player=name)
         except Exception as e:
             return jsonify({"error": str(e)})
 

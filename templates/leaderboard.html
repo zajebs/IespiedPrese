@@ -22,19 +22,17 @@
                 {% for rank, name, value in data %}
                 <tr>
                     <th scope="row">{{ rank }}</th>
-                    <td>{{ name }}</td>
+                    <td> <a href="/player/{{ name }}">{{ name }}</a></td>
                     <td>{{ value }}</td>
                 </tr>
                 {% endfor %}
             </tbody>
         </table>
         <p class="text-center mt-4 text-s font-weight-bold">Atjaunināts līdz spēlei: {{ last_updated_game[0] }} {{ last_updated_game[1] }} {{ last_updated_game[2] }} vs {{ last_updated_game[3] }}</p>
-        <p class="text-center mt-4">
-            <a href="https://docs.google.com/spreadsheets/d/1MRxo0eSDsBTgznVJQD9RUW-dv4HFGTvNMTDj9YfSxAE/" class="btn btn-primary">Apskatīt Google lapu</a>
-        </p>
-        <p class="text-center mt-2">
-            <a href="https://www.flashscore.com/football/europe/euro/" class="btn btn-secondary">Euro 2024 Flashscore</a>
-        </p>
+        <div style="text-align: center;" class="mt-4">
+            <a href="https://docs.google.com/spreadsheets/d/1MRxo0eSDsBTgznVJQD9RUW-dv4HFGTvNMTDj9YfSxAE/" class="btn btn-primary" role="button">Google Sheet</a>
+            <a href="https://www.flashscore.com/football/europe/euro/" class="btn btn-secondary" role="button">Flashscore</a>
+        </div>   
     </div>
 </body>
 </html>
