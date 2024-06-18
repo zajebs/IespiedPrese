@@ -113,7 +113,7 @@ def create_app():
         except Exception as e:
             return jsonify({"error": str(e)})
 
-    @app.route('/player/<name>', methods=['GET'])
+    @app.route('/la-familia/<name>', methods=['GET'])
     def get_player_data(name):
         try:
             service = build('sheets', 'v4', developerKey=GOOGLE_API_KEY)
